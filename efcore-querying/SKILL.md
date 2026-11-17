@@ -23,10 +23,10 @@ var dtos = await context.Blogs
 ```
 
 ## Checklist de eficiência (doc "Efficient Querying")
-1. **Índices:** o fator principal de velocidade. `StartsWith` usa índice (SQL Server); `EndsWith` não. Filtro por expressão sobre coluna (`price / 2`) não usa índice simples: coluna computada persistida. Índice acelera leitura e retarda escrita: não crie à toa; índice composto (A,B) ajuda filtros por A e por A+B, **não** só por B. Diagnostique com o plano de execução do banco.
+1. **Índices:** o fator principal de velocidade. A doc diz que não há conhecimento especial de EF aqui: vale o conhecimento geral de índices de banco. (A doc do provider SQL Server traduz `EndsWith` para `LIKE '%valor'`; que um `LIKE` com `%` no começo não use índice é conhecimento geral de banco, **não afirmado** nas páginas de EF lidas.) Filtro por expressão sobre coluna (`price / 2`) não usa índice simples: a doc sugere coluna computada persistida com índice (alguns bancos têm índice de expressão). Índice acelera leitura e retarda escrita: não crie à toa; índice composto (A,B) ajuda filtros por A e por A+B, **não** só por B. Diagnostique com o plano de execução do banco.
 2. **Projete só o que precisa** (`Select`): evita trazer colunas inúteis. Útil em leitura; para atualizar, precisa da entidade rastreada.
-3. **Limite o resultado** (`Take(n)`) e pagine. `Skip/Take` é intuitivo mas ineficiente em páginas profundas: prefira **keyset pagination** quando navega página a página (ver doc de paginação).
-4. **Cartesian explosion** ao carregar vários one-to-many com `Include` (JOINs duplicam dados): use **split queries** (`AsSplitQuery()`); cada query = um roundtrip.
+3. **Limite o resultado** (`Take(n)`) e pagine. `Skip/Take` é intuitivo mas ineficiente em páginas profundas: prefira **keyset pagination** (`WHERE` em vez de offset) quando navega página a página; ela **não permite acesso aleatório** a uma página qualquer (isso exige offset). Offset: o banco ainda processa as linhas ignoradas e atualizações concorrentes podem fazer entradas serem puladas ou repetidas. **Em qualquer método, a ordenação precisa ser totalmente única** (ex.: ordenar só por data com datas repetidas pode pular resultados); keyset costuma ordenar por mais de uma propriedade (ex.: data + Id).
+4. **Cartesian explosion** ao carregar vários one-to-many com `Include` (JOINs duplicam dados): use **split queries** (`AsSplitQuery()`); cada query = um roundtrip adicional. Contras da doc: sem garantia de consistência entre as queries se houver atualização concorrente (mitigável com transação serializable/snapshot); o modo padrão é single query e o EF emite aviso ao carregar várias coleções sem `AsSingleQuery`/`AsSplitQuery`; antes do EF 10, `Skip/Take` com split exige ordenação totalmente única.
 5. **Eager loading** (`Include`, `ThenInclude`, filtered include) quando você já sabe o que precisa: um roundtrip. Explicit/lazy loading somente quando a necessidade depende de outra fonte.
 6. **Evite lazy loading**: causa **N+1** (uma query por item). Preferir eager/explicit ou projeção (`Select(b => new { b.Url, b.Posts })`).
 7. **Buffering vs streaming:** `ToList/ToArray` carregam tudo na memória; `await foreach` com `AsAsyncEnumerable()` faz streaming. Não use `ToList` se vai aplicar outro operador LINQ depois: use `AsEnumerable()`/`AsAsyncEnumerable()`. (Retry strategy e split query também fazem buffering interno.)
@@ -54,7 +54,7 @@ Concorrência: tratar `DbUpdateConcurrencyException` (tutorial oficial usa `when
 | 5 | `ToList()` seguido de `.Where(...)` | Média |
 | 6 | Vários `Include` de coleção sem split query em tabelas grandes | Média |
 | 7 | `Skip` grande em paginação sequencial | Baixa/Média |
-| 8 | Filtros que não usam índice (`EndsWith`, funções sobre coluna) | Média |
+| 8 | Filtros que não usam índice (ex.: expressão sobre a coluna, como `price / 2`; confirme no plano de execução) | Média |
 | 9 | Chamadas síncronas (`ToList`, `SaveChanges`) | Média |
 | 10 | Mesma instância de contexto em tarefas paralelas | Alta |
 | 11 | Retornar entidade na API (usar DTO) | Alta |
