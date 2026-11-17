@@ -33,7 +33,7 @@ modelBuilder.ApplyConfigurationsFromAssembly(typeof(BlogEntityTypeConfiguration)
 - Alternativa: `[EntityTypeConfiguration(typeof(X))]` na entidade (a entidade precisa estar no modelo).
 - Bulk configuration/conventions: `ConfigureConventions`.
 - Debug: `context.Model.ToDebugString()`.
-- Entidades: **classes** com chave; **não usar `record`** como entidade (EF depende de igualdade por referência). Ver `dotnet-model-review`.
+- Entidades: **classes** com chave; a doc de change tracking diz que o EF compara instâncias de entidade por **igualdade por referência** e recomenda **evitar sobrescrever a igualdade da entidade**. A doc lida não fala de `record` como entidade; que `record` seja desaconselhado é **inferência** (records sobrescrevem `Equals`) — CONVENÇÃO. Para value objects, a doc de complex types usa `record` normalmente. Ver `dotnet-model-review`.
 
 ## Migrations
 Fluxo (doc):
@@ -44,7 +44,9 @@ dotnet ef migrations add AddBlogCreatedTimestamp   # nome descritivo
 ```
 - EF compara o modelo atual com o **snapshot** e gera a migration; arquivos vão no controle de versão. O banco guarda a **tabela de histórico** de migrations aplicadas.
 - Nomeie com descrição clara (`AddBlogCreatedTimestamp`).
-- **Produção:** `database update` direto é para dev. Doc recomenda: **migration bundle** para automação de deploy; **script SQL revisado** quando for preciso aprovar/modificar SQL; projetos específicos de plataforma → migrations em **projeto separado com design-time factory**. (Detalhes na página *Applying migrations*; confirmar antes de recomendar `Migrate()` no startup.)
+- **Produção:** `database update` direto é para dev. Doc recomenda: **migration bundle** para automação de deploy; **script SQL revisado** quando for preciso aprovar/modificar SQL; migrations em **projeto separado com `IDesignTimeDbContextFactory`** (recomendado quando o projeto da app é específico de plataforma: WinUI, MAUI, Blazor WebAssembly, Azure Functions etc.). `dotnet ef database update` é para desenvolvimento local: aplica o SQL sem chance de inspeção e exige SDK e código-fonte no servidor.
+- **`Migrate()`/`MigrateAsync()` no startup:** a doc (EF 9+) diz que há **lock de migration em todo o banco**, então pode ser aceitável para quem prefere deploy simples, mas **um passo separado de deploy continua preferível** quando importam revisão, credenciais de menor privilégio (a app precisa de permissão para alterar o schema), rollout coordenado ou alta disponibilidade. Antes do EF 9, várias instâncias podiam aplicar migration concorrentemente. No EF 9+, `Migrate()` **lança exceção** se o modelo tem mudanças pendentes em relação à última migration; detecte no CI com `dotnet ef migrations has-pending-model-changes`. Rollback executa os `Down` e pode perder dados. Seeding (`UseSeeding`) roda junto (ver `efcore-advanced-mapping`).
+- Bundles: não coloque connection string de produção em controle de versão nem dentro do bundle; use o secret store do deploy.
 - Tipos de outro DbContext no modelo → conflito: `ToTable(..., t => t.ExcludeFromMigrations())`.
 - Instale as ferramentas `dotnet ef` (ou Package Manager Console no Visual Studio).
 - Revise sempre o código gerado (pode ser alterado).
@@ -58,7 +60,7 @@ dotnet ef migrations add AddBlogCreatedTimestamp   # nome descritivo
 | 4 | Migrations versionadas no Git, com snapshot, nomes descritivos |
 | 5 | Migration revisada (colunas perdidas, drops de dados) |
 | 6 | Estratégia de produção definida (bundle/script), não `database update` na máquina do dev |
-| 7 | Entidade não é `record` |
+| 7 | Entidade sobrescrevendo igualdade (o EF usa igualdade por referência; `record` como entidade é inferência, não consta da doc) |
 | 8 | Índices em colunas filtradas com frequência (e FK) conscientes (convenção cria índice para FK) |
 | 9 | Projeto de migrations separado quando a plataforma exige |
 
