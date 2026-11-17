@@ -20,7 +20,7 @@ Só afirmar o que a doc oficial diz (fontes no fim). Autenticação/autorizaçã
 | **SignIn** | `RequireConfirmedEmail = false`, `RequireConfirmedPhoneNumber = false` (a template usa `RequireConfirmedAccount = true`). |
 | **User** | `RequireUniqueEmail = false`; `AllowedUserNameCharacters` limitado. |
 | **PasswordHasher** | `CompatibilityMode = IdentityV3` (PBKDF2), `IterationCount = 100000`. **Para senhas use `PasswordHasher`; não use `KeyDerivation.Pbkdf2` para guardar senha** (aviso oficial). |
-| **Cookie** | `ConfigureApplicationCookie`; `IsEssential = true` por padrão; `SameSite` Lax por padrão. |
+| **Cookie** | `ConfigureApplicationCookie`; `IsEssential = true` por padrão (cookie de autenticação é permitido sem consentimento); o padrão **Lax** que a doc cita é do `CookiePolicyOptions.MinimumSameSitePolicy` (para permitir OAuth2), não de `Cookie.SameSite`. |
 - **Security stamp / "sign out everywhere":** `ISecurityStampValidator` regenera o `ClaimsPrincipal` quando algo sensível muda (senha, roles); com cookies é **revalidado periodicamente** (`SecurityStampValidatorOptions.ValidationInterval`); com tokens, o tempo de vida do access token (`BearerTokenOptions.BearerTokenExpiration`) limita quanto a sessão sobrevive à mudança.
 - **Exigir autenticação global:** fallback policy (ver `aspnet-authentication-authorization`).
 
