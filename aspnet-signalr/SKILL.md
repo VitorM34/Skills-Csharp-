@@ -36,7 +36,7 @@ Métodos de hub podem retornar **`IAsyncEnumerable<T>`** (simples: método async
 - **Chamar o hub de fora** (controllers, background services): injete `IHubContext<THub>` (ver *hubcontext*); **background services** podem hospedar hubs (`AddSignalR` + `MapHub`).
 
 ## Configuração
-Serialização (JSON: camelCase por padrão; `AddJsonProtocol`; MessagePack), opções do servidor: **`KeepAliveInterval`** e **`ClientTimeoutInterval`** (padrão 30 s; **recomendado o dobro do keep-alive**: o servidor considera o cliente desconectado sem mensagem nesse intervalo), **`HandshakeTimeout`** (15 s; só altere com latência severa), `MaximumReceiveMessageSize` etc. (ver doc).
+Serialização (JSON: camelCase por padrão; `AddJsonProtocol`; MessagePack), opções do servidor: **`KeepAliveInterval`** (padrão **15 s**: intervalo do ping automático) e **`ClientTimeoutInterval`** (padrão **30 s**; o servidor considera o cliente desconectado sem mensagem, inclusive keep-alive, nesse intervalo; o valor **recomendado é o dobro do `KeepAliveInterval`**; ao mudar o keep-alive, ajuste também o `ServerTimeout` do cliente), **`HandshakeTimeout`** (15 s; só altere com latência severa), `MaximumReceiveMessageSize` etc. (ver doc).
 
 ## Hub filters
 Aplicáveis **globalmente ou por hub** (ordem de adição; **globais antes dos locais**); para **pular** a invocação, lance **`HubException`** em vez de chamar `next` (o cliente recebe erro se esperava resultado); escreva lógica genérica usando **atributos** nos métodos em vez de comparar nomes; registre o filtro como singleton se mantiver dados.
