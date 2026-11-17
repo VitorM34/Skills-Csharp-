@@ -29,10 +29,10 @@ Só afirmar o que a doc oficial diz (fontes no fim). Integração de API: `dotne
 | Transações | Não (ignoradas) | Sim | Sim | Sim | Sim |
 | Funções específicas do provider | Não | Não | Não | Sim | Sim |
 | Comportamento exato das queries | Depende | Depende | Depende | Sim | Sim |
-- **SQLite:** providers diferem (EF não abstrai tudo); mesma LINQ pode dar resultado diferente; `EF.Functions.DateDiffDay` do SQL Server falha; SQL bruto pode divergir.
-- **InMemory:** além dos problemas do SQLite, suporta menos queries, **sem transações**, **sem SQL bruto**, e é mais lento que SQLite in-memory.
+- **SQLite:** providers diferem (EF não abstrai tudo); mesma LINQ pode dar resultado diferente; `EF.Functions.DateDiffDay` do SQL Server falha; SQL bruto pode divergir. **SQLite in-memory:** cada conexão aberta cria um banco novo e fechar a conexão o apaga; como o `DbContext` abre/fecha a conexão a cada operação, a doc manda **abrir a conexão você mesmo**, passá-la ao EF e fechá-la só ao fim do teste (cada teste fica isolado no seu banco). A doc afirma que SQLite como fake costuma ficar problemático com o tempo e recomenda banco real ou, se um double for indispensável, o repository.
+- **InMemory:** além dos problemas do SQLite, suporta menos queries, **sem transações** (por padrão iniciar uma transação **lança exceção**; dá para ignorar com `InMemoryEventId.TransactionIgnoredWarning`, mas se o código depende de rollback real o teste não funciona), **sem SQL bruto**, e é mais lento que SQLite in-memory.
 - **Mock de `DbContext`:** bom para funcionalidade **não-query** (verificar chamadas a `Add`/`SaveChanges`). Mockar a consulta do `DbSet` não é possível de verdade (LINQ são extension methods estáticos sobre `IQueryable`); o que se faz é um `DbSet` sobre coleção em memória = fake com os mesmos defeitos do InMemory.
-- **Repository:** o repository de produção contém as queries LINQ; nos testes é stubado, retirando o EF Core da pilha. Custo: camada arquitetural extra, e o repositório **não pode expor `IQueryable`** (queries testáveis devem ficar em métodos que retornam `IEnumerable`). Você ainda precisa de testes contra o banco real para as queries do repositório.
+- **Repository:** o repository de produção contém as queries LINQ; nos testes é stubado, retirando o EF Core da pilha. Custo: camada arquitetural extra, e o repositório deve retornar `IEnumerable`/`IAsyncEnumerable` e **não `IQueryable`** (retornar `IQueryable` permitiria compor operadores, mantendo o EF envolvido na tradução e anulando o propósito do repository); toda query LINQ testável precisa ficar encapsulada em método assim. Vantagens fora do teste: concentra o acesso a dados e ajuda se a app suporta mais de um banco. Você ainda precisa de testes contra o banco real para as queries do repositório.
 
 ## Testando contra o banco real (doc "Testing against your production database system")
 1. **Instalar:** pacote do banco, Docker em CI, Testcontainers. SQL Server: prefira **Developer Edition** a LocalDB (LocalDB: nem tudo do SQL Server, só Windows, lag no 1º teste). Cloud: teste contra versão local (SQL Azure → SQL Server local; Cosmos DB → emulador), mas rode também contra o serviço antes de produção.
@@ -43,6 +43,7 @@ Só afirmar o que a doc oficial diz (fontes no fim). Integração de API: `dotne
 6. **Criação eficiente:** `EnsureDeleted/EnsureCreated` podem ser lentos; temporariamente comentar `EnsureDeleted` reaproveita o banco, mas o schema pode ficar desatualizado se o modelo mudar (só durante o ciclo de desenvolvimento).
 7. **Limpeza eficiente:** `DELETE FROM [Tabela];` bruto, ou o pacote **Respawn**, que limpa sem listar tabelas.
 8. A doc mostra xUnit, mas "conceitos similares existem em NUnit e outros".
+9. **Avançado** (doc *advanced topics*): `EnableServiceProviderCaching(false)` existe para quem substitui serviços internos em testes, mas o cache vem **habilitado por padrão** e desabilitá-lo **deixa a criação do `DbContext` muito mais lenta**; a doc recomenda o padrão na grande maioria dos casos.
 
 ## Checklist de revisão
 | # | Verificar |
@@ -64,4 +65,5 @@ Só afirmar o que a doc oficial diz (fontes no fim). Integração de API: `dotne
 - Choosing a testing strategy: https://learn.microsoft.com/en-us/ef/core/testing/choosing-a-testing-strategy
 - Testing against your production database system: https://learn.microsoft.com/en-us/ef/core/testing/testing-with-the-database
 - Testing without your production database system: https://learn.microsoft.com/en-us/ef/core/testing/testing-without-the-database
+- Advanced testing topics: https://learn.microsoft.com/en-us/ef/core/testing/advanced-topics
 - Testcontainers para .NET: https://dotnet.testcontainers.org/
