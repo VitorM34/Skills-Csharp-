@@ -50,7 +50,7 @@ public class ApplicationDbContext : DbContext
 \* provedores não mantidos pela Microsoft. **In-memory não é para produção** e a doc de testes do EF Core **desencoraja** seu uso até para testes (ver `efcore-testing`).
 Se o compilador não achar `UseX`, falta o pacote ou `using Microsoft.EntityFrameworkCore;`. Cada instância usa **um** provider.
 
-Resiliência (Azure SQL): `options.UseSqlServer(cs, o => o.EnableRetryOnFailure())`.
+Resiliência: a doc de *connection resiliency* descreve uma **execution strategy** (retry automático de comandos que falham); o provider SQL Server traz uma específica (inclusive para Azure SQL): `options.UseSqlServer(cs, o => o.EnableRetryOnFailure())`. **Atenção:** com essa estratégia, uma transação iniciada por você (`BeginTransactionAsync`) precisa rodar dentro da execution strategy (`CreateExecutionStrategy().ExecuteAsync(...)`); senão lança `InvalidOperationException`. Se a conexão cair durante o commit, o resultado da transação é incerto e o retry pode falhar (a doc discute o problema de idempotência).
 
 ## Regras da doc sobre o DbContext
 1. Vida curta: uma unit of work (criar → rastrear entidades → alterar → `SaveChanges(Async)` → descartar). **Descarte sempre** (libera recursos e evita vazamento por eventos).
@@ -59,10 +59,10 @@ Resiliência (Azure SQL): `options.UseSqlServer(cs, o => o.EnableRetryOnFailure(
 4. `InvalidOperationException` lançada pelo EF pode deixar o contexto em estado irrecuperável (erro de programação).
 5. **`AddDbContextFactory` / `IDbContextFactory<T>`** quando não há escopo alinhado (ex.: Blazor Server) ou há várias units of work no mesmo escopo. Contextos criados pela factory **não** são gerenciados pelo DI: você descarta (`using var context = factory.CreateDbContext()`).
 6. Use `DbContextOptions<TContext>` (genérico). Classe não herdável: `sealed`. Se for base herdada: construtor `protected` com `DbContextOptions` não genérico.
-7. Opções úteis: `UseQueryTrackingBehavior`, `LogTo`, `EnableSensitiveDataLogging` (só dev), `EnableDetailedErrors`.
+7. Opções úteis: `UseQueryTrackingBehavior`, `LogTo`, `EnableSensitiveDataLogging` (por padrão o EF não inclui valores de dados em exceções/logs porque podem ser confidenciais e vazar em produção; habilitar ajuda a depurar: use em desenvolvimento), `EnableDetailedErrors` (erros de query mais detalhados, ao custo de desempenho).
 8. `new DbContext` manual com `OnConfiguring` e string literal é válido, mas **strings hardcoded** de exemplo não servem para produção.
 9. Ferramentas de design (migrations) precisam conseguir criar o contexto; ver "Design-time context creation".
-10. Sempre use as APIs assíncronas (`SaveChangesAsync`, `ToListAsync`); misturar sync/async pode causar starvation do thread pool.
+10. Sempre use as APIs assíncronas (`SaveChangesAsync`, `ToListAsync`); a doc de *efficient querying* (não a de DbContext) avisa que misturar código sync e async é fácil de causar *thread-pool starvation*.
 
 ## Checklist de revisão
 | # | Verificar |
