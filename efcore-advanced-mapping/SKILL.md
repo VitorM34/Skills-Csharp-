@@ -8,7 +8,7 @@ description: Mapeamento avançado no EF Core - chaves (compostas, alternativas, 
 Só afirmar o que a doc oficial diz (fontes no fim). Base de modelagem/migrations: `efcore-migrations-modeling`. Relacionamentos: `efcore-relationships-loading`. Entidades C#: `dotnet-model-review`.
 
 ## Chaves
-- Configure PK por convenção (`Id`/`TypeId`), Data Annotation `[Key]` ou Fluent `HasKey`. **Chave composta**: só por Fluent (a convenção só cria em casos específicos, como coleção de owned type). Qualquer tipo primitivo (`string`, `Guid`, `byte[]`…) pode ser chave, mas **nem todo banco suporta todos os tipos**; conversão automática ou manual (`value conversions`).
+- Configure PK por convenção (`Id`/`TypeId`), Data Annotation `[Key]` ou Fluent `HasKey`. **Chave composta**: por Fluent (`HasKey`) ou pelo atributo `[PrimaryKey(...)]` na classe (a convenção só cria em casos específicos, como coleção de owned type). Qualquer tipo primitivo (`string`, `Guid`, `byte[]`…) pode ser chave, mas **nem todo banco suporta todos os tipos**; conversão automática ou manual (`value conversions`).
 - Chave deve ter valor **não padrão** ao adicionar, exceto quando **gerada pelo banco** (o EF usa um valor **temporário** até o `SaveChanges`). ⚠ **Se a chave é gerada pelo banco e você informa um valor não padrão ao adicionar, o EF assume que a entidade já existe e tenta atualizar** (não inserir); para inserir com valor explícito, desligue a geração ou veja "overriding value generation".
 - **Chaves alternativas**: só leitura e podem ser alvo de FK; **para apenas unicidade use índice único**.
 
@@ -19,10 +19,10 @@ Só afirmar o que a doc oficial diz (fontes no fim). Base de modelagem/migration
 
 ## Valores gerados
 - **Default values** (valor ou fragmento SQL; também preenchem linhas existentes ao adicionar coluna), **computed columns** (SQL), **chaves** (auto-incremento etc.), geração explícita (`ValueGeneratedOnAdd/OnAddOrUpdate/Never`: o **como** depende do provedor).
-- **Datas:** providers geralmente **não** configuram geração automática de data/hora; para **criação** use default com a função SQL (ex.: `GETUTCDATE()` no SQL Server); para **atualização** computed columns costumam ser inviáveis (funções não determinísticas): use **interceptors/eventos do `SaveChanges`** ou triggers. EF 10: nomes explícitos para default constraints no SQL Server (`UseNamedDefaultConstraints`; **renomeia todas na próxima migration**).
+- **Datas:** providers geralmente **não** configuram geração automática de data/hora; para **criação** use default com a função SQL (ex.: `GETUTCDATE()` no SQL Server); para **atualização**, a doc diz que os bancos geralmente não aceitam funções como `GETDATE()` em computed column e mostra como alternativa um **trigger** no banco (via SQL cru na migration). (Preencher o campo no `SaveChanges`, por exemplo com interceptor, é alternativa comum, mas **não está nessa página**: CONVENÇÃO.) EF 10: nomes explícitos para default constraints no SQL Server (`UseNamedDefaultConstraints`; **renomeia todas na próxima migration**).
 
 ## Índices
-Convenção cria índice para **FK**; `HasIndex`/`[Index]`. **Composto** acelera filtros por todas as colunas **e pelas primeiras** colunas; **único** (`IsUnique`); **ordem** por coluna (importante em compostos); **nome** (`HasDatabaseName`); **filtrado** (`HasFilter`; reduz tamanho/ custo em bancos que suportam); **colunas incluídas**. Segunda chamada `HasIndex` sobre as mesmas colunas **sobrescreve** a primeira. Índices aceleram leitura e **retardam escrita**: não crie à toa (ver `efcore-querying`).
+Convenção cria índice para **FK**; `HasIndex`/`[Index]`. **Composto** acelera filtros por todas as colunas **e pelas primeiras** colunas; **único** (`IsUnique`); **ordem** por coluna (importante em compostos); **nome** (`HasDatabaseName`); **filtrado** (`HasFilter`; reduz tamanho/custo em bancos que suportam; no SQL Server o EF adiciona `IS NOT NULL` em colunas anuláveis de índice único, e passar `null` desativa isso). Colunas incluídas: não constam da página de índices lida (são recurso de provider; não li). Segunda chamada `HasIndex` sobre as mesmas colunas **sobrescreve** a primeira. Índices aceleram leitura e **retardam escrita**: não crie à toa (ver `efcore-querying`).
 
 ## Value objects: complex types × owned entities
 | | Owned entity | **Complex type** |
@@ -55,9 +55,9 @@ Convertem entre tipo do modelo e do banco (`HasConversion`, `ValueConverter<TMod
 |---|---|
 | 1 | Value object mapeado como owned onde complex type é indicado (compartilhamento/`ExecuteUpdate`) |
 | 2 | Chave gerada pelo banco recebendo valor explícito ao adicionar (vira update) |
-| 3 | `string` sem `HasMaxLength` quando o banco usa tipo ilimitado; decimal sem precisão/escala |
-| 4 | Índices ausentes em filtros frequentes ou índices desnecessários; índice composto na ordem errada |
-| 5 | Timestamp de atualização por computed column inviável (usar interceptor) |
+| 3 | `string`/`byte[]` sem `HasMaxLength` (a doc a trata como dica de tipo ao provedor); decimal sem precisão/escala |
+| 4 | Índices ausentes em filtros frequentes ou índices desnecessários; ordem das colunas/sort do índice composto incompatível com as queries |
+| 5 | Timestamp de atualização por computed column com `GETDATE()` (a doc indica trigger) |
 | 6 | Enum persistido como número sem querer / conversão sem comparer em tipo mutável |
 | 7 | Herança sem registrar os tipos derivados; TPH com muitas colunas nullable sem avaliar |
 | 8 | Keyless usado esperando persistência |
