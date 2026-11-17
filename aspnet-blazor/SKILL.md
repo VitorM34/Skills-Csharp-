@@ -24,7 +24,7 @@ Cada componente adota um **render mode** (diretiva/atributo `@rendermode`, na de
 - Um Blazor Web App precisa ser configurado (`AddRazorComponents().AddInteractive...`, `MapRazorComponents<App>()`); componentes WebAssembly ficam num **projeto cliente**.
 
 ## Ciclo de vida (resumo)
-`SetParametersAsync` (aplica `[Parameter]`/`[CascadingParameter]`; ao sobrescrever, **chame `await base.SetParametersAsync(parameters)`**; `ParameterView.TryGetValue` é **case-sensitive**, diferente do roteamento) → `OnInitialized{Async}` (**inicialização única** por instância) → `OnParametersSet{Async}` → render → `OnAfterRender{Async}`. **O pai renderiza antes dos filhos**; com inicialização **assíncrona** a ordem de conclusão pai/filho não é determinística. Cuidado com **prerendering** (o componente inicializa duas vezes: prerender e interativo; a doc trata *quiescence* e persistência de estado pré-renderizado).
+`SetParametersAsync` (aplica `[Parameter]`/`[CascadingParameter]`; ao sobrescrever, a doc diz que **em geral** se deve chamar `await base.SetParametersAsync(parameters)` (em cenários avançados é possível não chamar o base e interpretar os parâmetros à mão, ciente de que isso muda o comportamento padrão); `ParameterView.TryGetValue` é **case-sensitive**, diferente do roteamento) → `OnInitialized{Async}` (**inicialização única** por instância) → `OnParametersSet{Async}` → render → `OnAfterRender{Async}`. **O pai renderiza antes dos filhos**; com inicialização **assíncrona** a ordem de conclusão pai/filho não é determinística. Cuidado com **prerendering** (o componente inicializa duas vezes: prerender e interativo; a doc trata *quiescence* e persistência de estado pré-renderizado).
 
 ## Disposal (evitar vazamentos)
 - Componente com `IDisposable`/`IAsyncDisposable` é descartado quando **removido da UI**; **não dependa do momento exato**; se implementar ambos, **só o async executa**; `IAsyncDisposable` não deve demorar.
@@ -47,7 +47,7 @@ Cada componente adota um **render mode** (diretiva/atributo `@rendermode`, na de
 | 3 | Lógica de inicialização que assume execução única apesar do prerendering (duas execuções) |
 | 4 | Render mode inadequado (ex.: Server onde o app precisa ser offline/escala; WebAssembly com segredos no cliente) |
 | 5 | `[Authorize]` em componente filho (não é avaliado fora de `@page`) |
-| 6 | Sobrescrita de `SetParametersAsync` sem chamar o base |
+| 6 | Sobrescrita de `SetParametersAsync` sem chamar o base (sem justificativa de cenário avançado) |
 | 7 | `OnInitializedAsync` longo sem estado de carregamento |
 | 8 | Segredos/chaves em código WebAssembly (baixado pelo cliente) |
 
