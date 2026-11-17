@@ -33,7 +33,7 @@ public class Post { public int Id { get; set; } public int BlogId { get; set; } 
 ## Carregando dados relacionados
 | Estratégia | Como | Notas (doc) |
 |---|---|---|
-| **Eager** | `Include`, `ThenInclude`, múltiplos níveis, **filtered include** (`Where/OrderBy/Take` dentro do `Include` da coleção) | um roundtrip; cada navegação de coleção aceita **um** conjunto de filtros; com queries *tracking*, **fixup de navegação** pode trazer entidades já rastreadas que não atendem ao filtro (use `NoTracking` ou recrie o contexto); `Include` em tipos derivados; `AutoInclude` no modelo e `IgnoreAutoIncludes()` na query |
+| **Eager** | `Include`, `ThenInclude`, múltiplos níveis, **filtered include** (`Where/OrderBy/Take` dentro do `Include` da coleção) | um roundtrip; operações aceitas no include filtrado: `Where`, `OrderBy[Descending]`, `ThenBy[Descending]`, `Skip`, `Take`; cada navegação incluída aceita **um único conjunto** de filtros (com vários `Include` da mesma coleção, só um deles pode ter filtro, ou todos repetem operações idênticas); com queries *tracking*, **fixup de navegação** pode trazer entidades já rastreadas que não atendem ao filtro (use `NoTracking` ou recrie o contexto); `Include` em tipos derivados; `AutoInclude` no modelo e `IgnoreAutoIncludes()` na query |
 | **Explicit** | `context.Entry(x).Collection(...).Load()` / `.Query()` | roundtrip extra; útil se a necessidade depende de outro dado |
 | **Lazy** | proxies (`UseLazyLoadingProxies`: navegações `virtual` em classe herdável) ou `ILazyLoader` (parâmetro do construtor chamado `lazyLoader`) | ⚠ **N+1**: evitar (ver `efcore-querying`) |
 - O EF **corrige (fixup) automaticamente navegações** para entidades já carregadas no contexto.
@@ -42,7 +42,9 @@ public class Post { public int Id { get; set; } public int BlogId { get; set; } 
 - Serialização de grafos com ciclos: ver "Related data and serialization" (prefira DTOs; `dotnet-dto-review`).
 
 ## Global query filters (doc "Global Query Filters")
-- Filtro aplicado **a todas as consultas** de um tipo; usos: **soft delete** (`HasQueryFilter(b => !b.IsDeleted)`; para persistir como soft delete sobrescreva `SaveChanges(Async)` convertendo `Deleted` em `Modified` com `IsDeleted = true`) e **multi-tenancy** (o `tenantId` precisa estar na instância do contexto, injetado no construtor; tenha cuidado com **DbContext pooling**: o contexto é reutilizado entre requisições, então o estado do tenant precisa ser tratado). Para ignorar: `IgnoreQueryFilters()`. Origem do tenant ID é **aspecto de segurança**.
+- Filtro aplicado **a todas as consultas** de um tipo; usos: **soft delete** (`HasQueryFilter(b => !b.IsDeleted)`; para persistir como soft delete sobrescreva `SaveChanges(Async)` convertendo `Deleted` em `Modified` com `IsDeleted = true`) e **multi-tenancy** (o `tenantId` precisa estar na instância do contexto, injetado no construtor; com **DbContext pooling** o contexto é reutilizado entre requisições (doc *advanced performance topics*, seção "Managing state in pooled contexts"), então o estado do tenant precisa ser tratado). Para ignorar: `IgnoreQueryFilters()`.
+- **Vários filtros na mesma entidade:** `HasQueryFilter` simples **sobrescreve** o anterior. **EF 10+**: filtros **nomeados** (vários por entidade) e `IgnoreQueryFilters(["nome"])` desativa só os indicados (sem argumento desativa todos). Antes do EF 10: combine com `&&` em uma única chamada.
+- **Cuidados da doc:** acessar por **navegação required** uma entidade com filtro pode dar resultado inesperado (o inner join pode filtrar o pai também, retornando menos elementos); filtros só no **tipo raiz** da hierarquia de herança; o EF **não detecta ciclos** nas definições de filtro (pode gerar loop na tradução). Para multi-tenancy em geral, a doc remete à página *multitenancy*; a fonte do tenant ID é aspecto de segurança (não li essa página inteira).
 
 ## Checklist de revisão
 | # | Verificar | Gravidade |
@@ -55,7 +57,7 @@ public class Post { public int Id { get; set; } public int BlogId { get; set; } 
 | 6 | Many-to-many com payload mapeado como "esconde junção" | Média |
 | 7 | One-to-one com lado principal/dependente invertido em relação ao banco | Média |
 | 8 | Entidades com ciclo serializadas direto na API | Alta |
-| 9 | Filtro global esquecido em `IgnoreQueryFilters` ou tenant ID de fonte não confiável | Alta |
+| 9 | `IgnoreQueryFilters` usado sem intenção (desativa todos os filtros, inclusive tenant) ou tenant ID de fonte não confiável; navegação required para entidade com filtro | Alta |
 | 10 | Split query com `Skip/Take` sem ordenação única (EF < 10) | Média |
 
 ## Fontes oficiais
