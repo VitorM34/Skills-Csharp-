@@ -29,13 +29,13 @@ Só afirmar o que a doc oficial diz (fontes no fim). Convenções de código: `c
 - **`AnalysisMode`** (`Recommended`, etc.) e `AnalysisMode<Category>` habilitam conjuntos maiores; ⚠ se configurar por propriedade MSBuild, **configurações em massa do .editorconfig são ignoradas**. `AnalysisLevel` fixa o conjunto por versão.
 - **Severidade** (`.editorconfig`/`.globalconfig`): `dotnet_diagnostic.<ID>.severity = error|warning|suggestion|silent|none|default` (regra única) e `dotnet_analyzer_diagnostic.category-<cat>.severity` (categoria; só afeta regras **já habilitadas** por padrão). `error` quebra o build; `warning` só com warnaserror.
 - **`.editorconfig`**: opções por arquivo/pasta (`[*.cs]`, `root = true`), vale no build e no IDE; só para arquivos **source**. **Global AnalyzerConfig** (`.globalconfig`, `is_global = true`, sem seções): opções de **projeto inteiro**, incluindo `AdditionalFiles`; pode ser incluído condicionalmente (ex.: relaxar regras em projetos de teste) via item `GlobalAnalyzerConfigFiles`.
-- **Estilo (IDE...) não é verificado no build por padrão:** ligue **`EnforceCodeStyleInBuild=true`** (aplica as regras configuradas como warning/error; algumas só rodam no VS). **`TreatWarningsAsErrors`**; `CodeAnalysisTreatWarningsAsErrors=false` permite manter avisos CA como avisos com `-warnaserror`. Código **gerado** é ignorado (`generated_code = true` para padrões extras).
-- **`dotnet format`** formata conforme `.editorconfig`; **`--verify-no-changes`** falha se algo precisa mudar (útil em CI).
+- **Estilo (IDE...) não é verificado no build por padrão:** ligue **`EnforceCodeStyleInBuild=true`** (aplica as regras configuradas como warning/error; algumas só rodam no VS). **`TreatWarningsAsErrors`**; `CodeAnalysisTreatWarningsAsErrors=false` permite manter avisos CA como avisos com `-warnaserror`. Código **gerado** é ignorado (`generated_code = true` para padrões extras; vem da doc de configuration options: a página *overview* lida não trata disso).
+- **`dotnet format`** formata conforme `.editorconfig`; **`--verify-no-changes`** falha se algo precisa mudar (útil em CI). (Conferido agora só pela existência na doc de `dotnet format`; a página de code analysis *overview* não o cita.)
 - **`ContinuousIntegrationBuild=true`** em CI (ex.: condicionar por `TF_BUILD`): habilita configurações de build oficial/determinístico (caminhos armazenados não locais).
 - Em testes/CI, builds implícitos do VS pulam análise, mas só são otimizados se `TreatWarningsAsErrors` não for `true` (`OptimizeImplicitlyTriggeredBuild`).
 
 ## Suporte e versões do .NET
-.NET 10 = **LTS** (suporte até **nov/2028**); .NET 9 = STS (até nov/2026); .NET 8 = LTS (até nov/2026). Major pode ter breaking changes; patches mensais (patch Tuesday = 2ª terça); apps usam o **patch mais recente instalado** do major.minor alvo e **não** sobem de major automaticamente. Cheque a política oficial antes de decidir TFM.
+Segundo o índice oficial de releases (`dotnet/core`, lido em 2026-11-19): .NET 10 = **LTS** (EOL **2028-11-14**); .NET 9 = STS e .NET 8 = LTS, ambos com **EOL 2026-11-10 (já encerrados)**; o índice lista o .NET 11 (STS) como ativo. Detalhes em `dotnet-version-migration`. Major pode ter breaking changes; patches mensais (patch Tuesday = 2ª terça); apps usam o **patch mais recente instalado** do major.minor alvo e **não** sobem de major automaticamente. Cheque a política oficial antes de decidir TFM.
 
 ## Checklist de revisão
 | # | Verificar | Gravidade |
@@ -49,7 +49,8 @@ Só afirmar o que a doc oficial diz (fontes no fim). Convenções de código: `c
 | 7 | `AnalysisMode` por propriedade anulando configuração em massa do `.editorconfig` | Baixa |
 | 8 | Supressões (`#pragma`, `none`) sem justificativa; regras desligadas globalmente em vez de por projeto de teste | Média |
 | 9 | Transitive pinning/`VersionOverride` em biblioteca sem avaliar efeito no pack | Média |
-| 10 | Alvo em versão fora de suporte | Alta |
+| 10 | Alvo em versão fora de suporte (hoje .NET 8 e 9 já saíram de suporte) | Alta |
+| 11 | `GlobalPackageReference`/`VersionOverride`: confira os requisitos de versão de VS/SDK/NuGet na doc de CPM antes de usar | Baixa |
 
 ## Fontes oficiais
 - Project SDKs: https://learn.microsoft.com/en-us/dotnet/core/project-sdk/overview
