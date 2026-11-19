@@ -46,10 +46,10 @@ Resolver: ✔ singleton a partir de scoped/transient; ✔ scoped a partir de sco
 - Use singleton só para serviços com estado próprio caro ou globalmente compartilhado; sem estado → evite singleton. Singleton exige **thread safety**; o container é thread-safe ao resolver, mas isso não torna thread-safe as instâncias.
 
 ## Armadilhas (anti-patterns da doc)
-1. **Captive dependency**: singleton que recebe scoped no construtor (ex.: `Foo(Bar)` com `Foo` singleton e `Bar` scoped) → o scoped vive como singleton. Detectar com **scope validation** (`validateScopes: true`; ligado por padrão em Development com `CreateApplicationBuilder`).
+1. **Captive dependency**: singleton que recebe scoped no construtor (ex.: `Foo(Bar)` com `Foo` singleton e `Bar` scoped) → o scoped vive como singleton. Detectar com **scope validation**: a doc diz que por padrão, em Development (host criado com `CreateApplicationBuilder`), resolver serviço de um de lifetime maior falha; a página de lifetimes lida não cita o nome da opção `validateScopes` (use a doc da API `ServiceProviderOptions` para fora do host padrão).
 2. **Scoped resolvido fora de escopo** vira singleton na prática.
 3. **Service locator** (`GetService` onde DI serve; injetar factory que resolve em runtime): evitar.
-4. **`BuildServiceProvider` durante o registro**: evitar; use overloads que recebem `IServiceProvider`.
+4. **`BuildServiceProvider` durante o registro**: evitar; use overloads que recebem `IServiceProvider` (não confirmei esta frase nas páginas de DI lidas agora: a doc de scope validation diz que `BuildServiceProvider` é onde a validação de escopos acontece; ⚠ trate como CONVENÇÃO até reconferir).
 5. **Factory async com `.Result`** → deadlock. DI não suporta resolução async; chame métodos async depois de resolver.
 6. **Guardar `IApplicationBuilder.ApplicationServices` em estático**; acesso estático a services.
 7. **Colocar dados/configuração no container** (ex.: carrinho do usuário). Configuração → options pattern.
@@ -59,7 +59,7 @@ Resolver: ✔ singleton a partir de scoped/transient; ✔ scoped a partir de sco
 `AddKeyedSingleton<IMessageWriter, QueueMessageWriter>("queue")` e consumo com `[FromKeyedServices("queue")]`. Chave pode ser qualquer `object` com `Equals` correto. Desde .NET 10, `GetKeyedService` (singular) com `KeyedService.AnyKey` lança `InvalidOperationException`.
 
 ## Container padrão vs terceiros
-Use o embutido, a menos que precise de: property injection, child containers, lifetime customizado, `Func<T>` lazy, registro por convenção.
+Use o embutido, a menos que precise de recursos que ele não tem. A lista (property injection, injeção por nome, child containers, lifetime customizado, `Func<T>` lazy, registro por convenção) vem da seção "Default service container replacement", que **não consegui reler** nesta revisão (a página de ASP.NET só aponta para ela): confira na doc antes de citar.
 
 ## Checklist de revisão
 | # | Verificar |
