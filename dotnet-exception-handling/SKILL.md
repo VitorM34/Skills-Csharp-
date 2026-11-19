@@ -8,7 +8,7 @@ description: Implementar e revisar tratamento de exceções em C#/.NET - try/cat
 Só afirmar o que a doc oficial diz (fontes no fim). Para exceções em respostas HTTP, ver `aspnet-error-handling`.
 
 ## Tratando exceções
-1. **`try/catch` só quando dá para se recuperar.** Se não dá, **não capture**: deixe quem está acima na pilha tratar. Ordene `catch` do tipo **mais derivado ao menos derivado**. Não capture `System.Exception` sem filtro de exceção (guideline de conventions: "só capture exceções que pode tratar de fato; evite exceções gerais").
+1. **`try/catch` só quando dá para se recuperar.** Se não dá, **não capture**: deixe quem está acima na pilha tratar. Ordene `catch` do tipo **mais derivado ao menos derivado**. A doc de best practices diz: se o código não consegue se recuperar, não capture. Os coding conventions dizem "só capture exceções que pode tratar de fato; evite capturar exceções gerais". (A ressalva "salvo com filtro de exceção `when`" é CONVENÇÃO, não consta dessas páginas.)
 2. **Libere recursos** com `using` (preferido, inclusive a forma sem chaves `using var x = ...;`) ou `finally` para o que não é `IDisposable`.
 3. **Evite a exceção em condições comuns**: verifique antes (`if (conn.State != Closed)`), ou use métodos **`Try*`** (`int.TryParse`, `Dictionary.TryGetValue`). Use exceção para eventos realmente excepcionais; checagem em código quando é parte do fluxo normal. (Race condition entre checagem e operação ainda pode lançar.)
 4. **Projete classes para evitar exceções**; retornar `null`/`default` (ou `Nullable<T>`) nos casos comuns de "não achou" é aceitável.
@@ -20,17 +20,17 @@ Só afirmar o que a doc oficial diz (fontes no fim). Para exceções em resposta
 7. **Cancelamento/async:** capture `OperationCanceledException` (não `TaskCanceledException`, que deriva dela). Exceção em método async fica na `Task` e sai no `await`; **erros de uso (ex.: `ArgumentException`) saem de forma síncrona**.
 
 ## Lançando exceções
-1. **Tipos predefinidos** primeiro: `InvalidOperationException` (estado inadequado), `ArgumentException` e derivadas (parâmetro inválido). **Não lance** tipos reservados: `AccessViolationException`, `IndexOutOfRangeException`, `NullReferenceException`, `StackOverflowException` (CA2201).
+1. **Tipos predefinidos** primeiro: `InvalidOperationException` (estado inadequado), `ArgumentException` e derivadas (parâmetro inválido). **Não lance** `Exception`, `SystemException`, `NullReferenceException`, `IndexOutOfRangeException` no seu código (página de criar/lançar exceções), nem tipos reservados como `AccessViolationException` e `StackOverflowException` (best practices; CA2201). **Não retorne exceções** como valor/parâmetro em vez de lançá-las. Em `ArgumentException`, `ParamName` deve ser o nome do argumento.
 2. **Use os helpers estáticos de throw:** `ArgumentNullException.ThrowIfNull(x)`, `ArgumentException.ThrowIfNullOrEmpty/WhiteSpace`, `ArgumentOutOfRangeException.ThrowIfNegative/Zero/GreaterThan...`, `ObjectDisposedException.ThrowIf`, e `ct.ThrowIfCancellationRequested()` (CA1510–CA1513, CA2250).
-3. **Mensagem** clara, gramática correta, terminando com ponto; localizada em apps localizados.
+3. **Mensagem** que explique o motivo, cada frase terminando com ponto; **não ponha informação sensível à segurança na mensagem**.
 4. Coloque o `throw` onde a stack trace é útil. Crie *exception builder methods* se lança a mesma exceção em vários lugares.
 5. **Não lance** em `finally` (CA2219), nem em `Equals`, `GetHashCode`, `ToString`, construtores estáticos, operadores de igualdade (CA1065).
 6. **Validar argumentos antes** da parte assíncrona em métodos que retornam `Task`.
 
 ## Exceções customizadas
-- Só crie quando não há tipo predefinido adequado. Nome termina em `Exception`, deriva de `Exception`.
-- Inclua ao menos os 3 construtores: `()`, `(string message)`, `(string message, Exception inner)`.
-- Propriedades extras só se houver cenário programático que use (ex.: `FileName` em `FileNotFoundException`).
+- "Só crie quando não há tipo predefinido adequado" e "o nome termina em `Exception`" (derivando de `Exception`) são regras das design guidelines/CA1710, que **não li** (a página de criar/lançar lida não trata de nome nem de "quando criar"): tratar como CONVENÇÃO.
+- A doc diz que a classe derivada deve definir **ao menos 3 construtores**: `()`, `(string message)`, `(string message, Exception inner)`.
+- Adicione propriedades quando o dado ajudar a resolver a exceção; nesse caso **sobrescreva `ToString()`** para incluí-las.
 
 ```csharp
 public class OrderNotFoundException : Exception
