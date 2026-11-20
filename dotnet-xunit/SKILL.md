@@ -34,7 +34,7 @@ O xUnit **cria uma nova instância da classe de teste para cada teste**.
 | Por classe | `IClassFixture<T>` injetado no construtor | setup caro compartilhado entre testes de **uma** classe; criado antes do 1º teste, descartado após o último |
 | Várias classes | `[CollectionDefinition("X")]` + `ICollectionFixture<T>` + `[Collection("X")]` | compartilhar entre classes; **testes da collection rodam em sequência** |
 | Assembly inteiro | `[assembly: AssemblyFixture(typeof(T))]` (**v3**) | uma instância por assembly; **deve ser thread-safe** (paralelismo não muda) |
-Fixture de banco (EF Core doc): criado uma vez, com lock se usado por várias classes; ver `efcore-testing`.
+A doc de shared context diz também que **fixtures não podem depender de outras fixtures** e que a fixture de assembly (v3) pode ser usada por vários testes simultaneamente (projete para acesso paralelo). Fixture de banco (EF Core doc): criado uma vez, com lock se usado por várias classes; ver `efcore-testing`. (Conferido agora em xunit.net: instância nova por teste, `IAsyncLifetime`, `IAsyncDisposable` só na v3, `IClassFixture`, modos de paralelismo, `DisableParallelization`, `MaxParallelThreads` v2 × `Parallelization` v3 4.0+.)
 
 ## Paralelismo (doc xunit.net)
 - Os testes rodam em paralelo **por collection**; por padrão **cada classe é sua própria collection** (`CollectionPerClass`). Testes da mesma collection rodam em série; collections diferentes podem rodar ao mesmo tempo.
