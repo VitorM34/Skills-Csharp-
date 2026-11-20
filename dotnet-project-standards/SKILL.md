@@ -45,7 +45,7 @@ repo/
 ├─ README.md · CLAUDE.md · .claude/ (skills/rules do projeto)
 ```
 - Nome do projeto = namespace raiz; `X.Tests` para testes do projeto `X` (padrão do tutorial oficial). Camadas e dependências: `dotnet-clean-architecture`; módulos: `dotnet-modular-monolith`.
-- **Artifacts output layout [MS]** (`UseArtifactsOutput=true`, .NET 8+): todos os `bin/`, `obj/`, `publish/` e `package/` vão para `artifacts/<tipo>/<projeto>/<pivot>` ao lado do `Directory.Build.props` (ex.: `artifacts/bin/MyApp/debug`, `artifacts/publish/MyApp/release_linux-x64`, `artifacts/package/release`); personalize com `ArtifactsPath`/`ArtifactsProjectName`/`ArtifactsPivots`; **inclua `artifacts/` no `.gitignore`**.
+- **Artifacts output layout [MS]** (`UseArtifactsOutput=true`, .NET 8+): todos os `bin/`, `obj/`, `publish/` e `package/` vão para `artifacts/<tipo>/<projeto>/<pivot>` ao lado do `Directory.Build.props` (ex.: `artifacts/bin/MyApp/debug`, `artifacts/publish/MyApp/release_linux-x64`, `artifacts/package/release`); personalize com `ArtifactsPath`/`ArtifactsProjectName`/`ArtifactsPivots`; **inclua `artifacts/` no `.gitignore`** (CONVENÇÃO: a página *artifacts output* lida não traz esse conselho; `dotnet new buildprops --use-artifacts` gera a propriedade).
 
 ## Arquivos de raiz e papel [MS]
 | Arquivo | Papel | Skill |
@@ -63,7 +63,7 @@ repo/
 
 ## Preparar o repositório para o Claude Code [CC]
 - **O que é:** cada sessão começa com **contexto novo**; dois mecanismos persistem conhecimento: **`CLAUDE.md`** (instruções que você escreve) e **auto memory** (notas do Claude). O `CLAUDE.md` é **contexto, não configuração imposta** — para **bloquear** uma ação use um **hook PreToolUse**.
-- **Onde:** `./CLAUDE.md` ou `./.claude/CLAUDE.md` (compartilhado no git); `~/.claude/CLAUDE.md` (pessoal); **`./CLAUDE.local.md`** (pessoal do projeto — **coloque no `.gitignore`**); política gerenciada (organização). Subdiretórios carregam sob demanda. Repositórios com `AGENTS.md` podem usá-lo. **`/init`** gera um `CLAUDE.md` inicial (comandos de build/teste, convenções); refine com o que o Claude **não descobre sozinho**.
+- **Onde:** `./CLAUDE.md` ou `./.claude/CLAUDE.md` (compartilhado no git); `~/.claude/CLAUDE.md` (pessoal); **`./CLAUDE.local.md`** (pessoal do projeto — **coloque no `.gitignore`**); política gerenciada (organização). Subdiretórios carregam sob demanda. Repositórios com `AGENTS.md` podem usá-lo (a doc diz que, por padrão, ele só é lido quando **não** existe `CLAUDE.md`; exige uma versão recente do Claude Code). **`/init`** gera um `CLAUDE.md` inicial (comandos de build/teste, convenções); refine com o que o Claude **não descobre sozinho**.
 - **Como escrever bem:** fatos que valem **toda sessão** (comandos de build/teste, convenções, layout, regras "sempre faça X"); **concreto e verificável** ("rode `dotnet test` antes de commitar", "handlers ficam em `src/Api/Endpoints`"); **abaixo de ~200 linhas**; organizado por cabeçalhos; **sem instruções contraditórias**. **Procedimento de vários passos ou assunto de uma parte do código ⇒ skill ou regra por caminho** (`.claude/rules/`), não `CLAUDE.md`. Importe arquivos com `@caminho` (máx. 4 níveis; importar **não reduz** o custo de contexto). Audite com `/doctor prompt-audit` (cobre CLAUDE.md, rules, skills etc.).
 - **Skills do projeto:** instale as skills deste conjunto **no projeto** (`./install.sh /caminho/projeto` → `<projeto>/.claude/skills`) ou no usuário (`~/.claude/skills`).
 - **Modelo de `CLAUDE.md` para .NET (adapte; mantenha curto):**

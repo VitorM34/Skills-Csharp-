@@ -19,9 +19,9 @@ Regra da doc de integração: **se um comportamento pode ser testado com unitár
 - **Framework de teste** = o que você escreve (atributos/APIs): **MSTest**, **NUnit**, **xUnit.net**, **TUnit**. **Plataforma** = quem executa e integra com IDE/CLI: **VSTest** ou **Microsoft.Testing.Platform (MTP)**.
 - MSTest, NUnit e xUnit suportam VSTest e MTP; **TUnit só MTP**.
 - Escolha **uma plataforma por repositório**; **não misture** projetos VSTest e MTP na mesma solution/execução (não suportado).
-- MTP quando: Native AOT/trimming, testes que se comportam como executáveis (`dotnet run`, `dotnet watch`), defaults estritos/determinísticos (ex.: falhar se nenhum teste rodar), WinUI/UWP (versões específicas). VSTest quando: mistura com adaptadores não-.NET (C++/JS) ou integrações antigas de CI/ferramentas.
-- `dotnet test` tem dois modos: **VSTest** (padrão; único antes do .NET 10 SDK) e **MTP** (a partir do .NET 10 SDK, só para apps MTP). Rodar MTP em modo VSTest (`TestingPlatformDotnetTestSupport=true` + `Microsoft.Testing.Platform.MSBuild`) é considerado legado e será removido na MTP v2 com .NET 10 SDK. Defina propriedades da plataforma em `Directory.Build.props` para não divergir entre projetos.
-- Relatórios TRX no MTP exigem a extensão `Microsoft.Testing.Extensions.TrxReport` (senão exit code 5).
+- MTP quando (página *test platforms overview*): cenários Native AOT/trimming, projetos de teste que se comportam como executáveis ("executable-first") e defaults estritos/determinísticos com modelo de extensões opt-in. (Itens como `dotnet watch`, "falhar se nenhum teste rodar" e WinUI/UWP não apareceram na leitura: confira a página.) VSTest quando: mistura com adaptadores não-.NET (a doc diz que suporta cenários de adaptadores de várias linguagens) ou integrações existentes de CI/ferramentas (maior histórico de compatibilidade).
+- `dotnet test` tem dois modos: **VSTest** (padrão; único antes do .NET 10 SDK) e **MTP** (a partir do .NET 10 SDK, só para apps MTP). A doc confirma: VSTest é o modo padrão e o modo MTP nativo existe a partir do .NET 10 SDK. A frase "rodar MTP em modo VSTest (`TestingPlatformDotnetTestSupport=true`) é legado e será removido na MTP v2" e a dica de `Directory.Build.props` **não foram reconfirmadas** nesta revisão (a página de overview lida não as traz): confira em *dotnet test* para MTP.
+- Relatórios TRX no MTP exigem a extensão `Microsoft.Testing.Extensions.TrxReport`; sem ela, a doc diz que opções como `--report-trx` são **não reconhecidas**. (O "exit code 5" desta skill não aparece na página de reports lida: não afirme.)
 
 ## 3. Estrutura da solution (tutorial xUnit + integração)
 ```
@@ -48,7 +48,7 @@ Usar traits/categorias (ex.: separar `Category=Integration`) permite rodar subco
 ```bash
 dotnet test --collect:"XPlat Code Coverage"
 ```
-- Cobertura alta **não** prova qualidade, e metas muito ambiciosas (ex.: 95%) podem ser contraproducentes (ver `dotnet-unit-testing`).
+- Cobertura alta **não** prova qualidade, e metas muito ambiciosas (ex.: 95%) podem ser contraproducentes: a página de code coverage lida **não** traz essa ressalva (ver `dotnet-unit-testing` para a fonte; tratar como CONVENÇÃO até conferir).
 
 ## 6. Pipeline (CI)
 `dotnet test` é multiplataforma e serve em CI/CD e scripts. Rode unitários em todo commit/PR; integração conforme custo (filtro ou job separado). Azure DevOps: tarefa `DotNetCoreCLI@2` (`dotnet test`) funciona com VSTest e MTP; a `VSTest@3` só com VSTest. Para providers e bancos em CI, ver `efcore-testing` (Docker/Testcontainers citados pela doc).
@@ -61,7 +61,7 @@ A Microsoft documenta NUnit por tutorial (`dotnet new nunit`: SDK de teste + fra
 ### Microsoft.Testing.Platform: extensões (todas via pacote NuGet; auto-registradas com `Microsoft.Testing.Platform.MSBuild`)
 | Necessidade | Extensão / opção |
 |---|---|
-| Cobertura | `Microsoft.Testing.Extensions.CodeCoverage`: `--coverage`, `--coverage-output`, `--coverage-output-format coverage|xml|cobertura`, `--coverage-settings`. No MTP o padrão `IncludeTestAssembly` é `false` (no VSTest era `true`). A partir da MTP 2.4: limites (thresholds) de cobertura; falha de limite sai com **exit code 14** (`--ignore-exit-code 14` para ignorar) |
+| Cobertura | `Microsoft.Testing.Extensions.CodeCoverage`: `--coverage`, `--coverage-output`, `--coverage-output-format coverage|xml|cobertura`, `--coverage-settings`. No MTP o padrão `IncludeTestAssembly` é `false` (no VSTest era `true`). Com a MTP 2.4, coletores compatíveis publicam resultados de cobertura e avaliações de limite (thresholds); quando um limite publicado falha, uma execução que seria bem-sucedida sai com **exit code 14** (`--ignore-exit-code 14` para ignorar). O pacote é distribuído sob licença "closed-source free to use". Alternativa open source: `coverlet.MTP` (`dotnet test --coverlet`, formatos `json|lcov|opencover|cobertura|teamcity`). Com vários módulos no `dotnet test`, o mesmo `--coverage-output` fixo faz relatórios se sobrescreverem (use `--results-directory-layout per-module` ou omita o nome) |
 | Relatórios | TRX (`--report-trx`, pacote `Microsoft.Testing.Extensions.TrxReport`), Azure DevOps, GitHub Actions (log groups/annotations/job summary), HTML, JUnit, CTRF; `--results-directory`; `--report-*-filename` com placeholders `{asm}`, `{tfm}`, `{arch}`, `{pname}`, `{pid}`, `{time}`; relatório com o mesmo nome é **sobrescrito** (use `{time}` para manter histórico); consolidação de relatórios (MTP 2.4, experimental) |
 | Repetir testes instáveis | `Microsoft.Testing.Extensions.Retry`: `--retry-failed-tests N`, `--retry-failed-tests-max-percentage`, `--retry-failed-tests-max-tests`, `--retry-failed-tests-delay` (MTP 2.3+). Indicado para **testes de integração** com falhas transitórias, **não** para esconder testes instáveis (a MTP 2.4 reporta contagens `flaky`/`retried`). Licença restritiva do pacote |
 | Diagnóstico | dumps de crash/hang, gravação de tela (experimental), OpenTelemetry |

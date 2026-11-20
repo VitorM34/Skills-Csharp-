@@ -18,7 +18,7 @@ O projeto testado é o **SUT** (System Under Test). Para SPAs, a doc recomenda *
 - Referenciar `Microsoft.AspNetCore.Mvc.Testing`.
 - `<Project Sdk="Microsoft.NET.Sdk.Web">` no projeto de teste.
 - Framework de teste (ex.: `xunit`, `xunit.runner.visualstudio`) e, com `xunit.runner.visualstudio` ≥ 2.4.2, `Microsoft.NET.Test.Sdk`.
-- O pacote copia o `.deps` do SUT para o `bin` do teste, define o **content root** como a raiz do SUT e fornece `WebApplicationFactory<TEntryPoint>`.
+- O pacote fornece `WebApplicationFactory<TEntryPoint>`; o **content root** é achado por `WebApplicationFactoryContentRootAttribute` (da assembly do `TEntryPoint`) ou, na falta dele, procurando o arquivo `.sln`. (A cópia do `.deps` do SUT para o `bin` do teste não apareceu na leitura de agora.)
 - `TEntryPoint` é a classe de entrada do SUT, normalmente `Program`. (A página lida não detalha como tornar `Program` acessível ao projeto de teste quando é top-level; confirme na doc/ao compilar antes de afirmar a técnica.)
 - Sem ambiente definido, o SUT roda como `Development`. Para definir o ambiente, faça na factory customizada.
 
@@ -73,7 +73,8 @@ Mock de `AuthenticationHandler<AuthenticationSchemeOptions>` que retorna `Authen
 
 ## Outros detalhes da doc
 - Cookies não essenciais não persistem entre requisições com política GDPR ligada: marque como essenciais nos testes.
-- Antiforgery em Razor Pages/MVC: a doc usa AngleSharp para parsear HTML, ou *Application Parts* para pegar tokens por JSON.
+- Antiforgery em Razor Pages/MVC: a doc diz que **AngleSharp não é suportado nem necessário** para testes de integração do ASP.NET Core; pode-se usar outro parser ou tratar o token e o cookie de antiforgery diretamente. (A menção a *Application Parts* para obter tokens por JSON desta skill não foi reconfirmada.)
+- `ConfigureWebApplicationBuilder` (mantém a fonte de configuração disponível logo após `CreateBuilder`) aparece na doc a partir do **.NET 11 Preview 7**: **não vale no .NET 10**.
 - Content root inferido via `WebApplicationFactoryContentRootAttribute` ou procurando o `.sln`.
 - Shadow copying (xUnit) pode atrapalhar testes que carregam arquivos relativos a `Assembly.Location`: `xunit.runner.json` com `{"shadowCopy": false}`.
 - Testes que alteram dados e compartilham banco podem interferir: re-seed por teste ou isolamento (ver `efcore-testing`).

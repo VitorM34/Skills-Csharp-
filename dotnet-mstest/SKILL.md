@@ -37,9 +37,9 @@ public class CalculatorTests
 | Atributo | Uso |
 |---|---|
 | `[DataRow(...)]` | dados inline, estáticos; nº e tipos devem casar com a assinatura; suporta `params`, arrays, `null`; `DisplayName`; `IgnoreMessage` (3.8+) para pular uma linha |
-| `[DynamicData(nameof(Dados))]` | dados vindos de método/propriedade/campo `IEnumerable<T>`; tipos aceitos incluem `ValueTuple` (compile-time, simples), `Tuple`, arrays; `TestDataRow<T>` adiciona display name/categorias/ignore por caso |
+| `[DynamicData(nameof(Dados))]` | dados vindos de método ou propriedade `public static` (campo a partir do MSTest **3.11**) `IEnumerable<T>`; tipos aceitos incluem `ValueTuple` (compile-time, simples), `Tuple`, arrays; `TestDataRow<T>` adiciona display name/categorias/ignore por caso |
 | `[CombinatorialData]` | produto cartesiano (MSTest **4.4+**); `CombinatorialValues`, `CombinatorialRange`, `CombinatorialRandomData`; não faz pairwise nem exclusões |
-| `[DataSource]` | fontes externas (cenário legado) |
+| `[DataSource]` | fontes externas: a doc diz que só existe no **.NET Framework**; em .NET (Core) use `DataRow` ou `DynamicData` |
 - Métodos de teste genéricos a partir do MSTest 3.8 (tipo inferido de `DataRow`/`DynamicData`). `DateOnly`/`TimeOnly` em `DataRow` a partir da 3.10.
 - Não copie o teste para variar parâmetro: use `DataRow`.
 
@@ -48,7 +48,7 @@ public class CalculatorTests
 2. **Classe:** `[ClassInitialize]`/`[ClassCleanup]` (herança via `InheritanceBehavior.BeforeEachDerivedClass`).
 3. **Global por teste** (3.10+): `[GlobalTestInitialize]`/`[GlobalTestCleanup]` (ordem entre múltiplos não é garantida).
 4. **Por teste:** `[TestInitialize]`/`[TestCleanup]` (por linha de dados em testes parametrizados).
-Regras dos de assembly/classe: **`public static`**, retorno `void`/`Task`/`ValueTask`, `Initialize` exige um parâmetro `TestContext`, `Cleanup` aceita zero ou um (3.8+), um de cada por assembly/classe, dentro de classe `[TestClass]`. Falha em cleanup é reportada como resultado separado (4.2+). Test classes podem receber `TestContext` pelo **construtor** (3.6+, preferido à propriedade). MSTest 4.5 (experimental): `MSTest.Extensions.Hosting` cria classes de teste com serviços do `Microsoft.Extensions.Hosting`.
+Regras dos de assembly/classe: **`public static`**, retorno `void`/`Task`/`ValueTask`, `Initialize` exige um parâmetro `TestContext`, `Cleanup` aceita zero ou um (3.8+), um de cada por assembly/classe, dentro de classe `[TestClass]`. Falha em cleanup é reportada como resultado separado (4.2+). Test classes podem receber `TestContext` pelo **construtor** (a doc lida só cita um parâmetro `TestContext` exato em construtor público, sem versão: o "3.6+" e o "preferido à propriedade" desta skill não foram confirmados). MSTest 4.5 (experimental): `MSTest.Extensions.Hosting` cria classes de teste com serviços do `Microsoft.Extensions.Hosting`.
 
 ## Execução e controle
 - Execução é **sequencial por padrão**. Paralelismo: `[assembly: Parallelize(Workers = 0, Scope = ExecutionScope.MethodLevel|ClassLevel)]` (Workers 0 = nº de processadores lógicos); `[DoNotParallelize]` em classe/método; também via `.runsettings`, `testconfig.json` (`mstest.parallelism.enabled`) e MSBuild (`MSTestParallelizeScope`). A doc recomenda habilitar no assembly por padrão para que testes novos nasçam compatíveis com paralelismo (analyzer MSTEST0001).
@@ -63,10 +63,10 @@ Regras dos de assembly/classe: **`public static`**, retorno `void`/`Task`/`Value
 Propriedades úteis: `TestName`, `CurrentTestOutcome`, `FullyQualifiedTestClassName`, `TestRunDirectory`, `ResultsDirectory`, `DeploymentDirectory`, `TestRunCount` (3.9+), `TestTempDirectory` (diretório temporário único por teste/linha; apagado se passa; `MSTEST_TEST_TEMP_DIRECTORY_RETAIN=1` mantém), `WriteLine`.
 
 ## Projeto, SDK e runner
-- **MSTest tem runner próprio (desde 3.2.0)**, mais leve/rápido que VSTest e o recomendado; baseado em MTP.
+- **MSTest tem runner próprio (desde 3.2.0)**, mais leve/rápido que VSTest e o recomendado; baseado em MTP. (A página do MSTest.Sdk lida não traz essa versão nem a lista de plataformas suportadas abaixo: vêm das páginas *overview*/*running tests*, não relidas agora.)
 - **`MSTest.Sdk`** substitui `Microsoft.NET.Sdk` e **liga o runner MTP por padrão** (`EnableMSTestRunner` e `TestingPlatformDotnetTestSupport` = true). Volte ao VSTest com `<UseVSTest>true</UseVSTest>`. Não funciona onde se precisa de outro SDK base (ex.: `Microsoft.NET.Sdk.Web` em testes de integração): configure manualmente (`EnableMSTestRunner`, `OutputType=Exe`, pacote `MSTest`).
 - Meta-pacote `MSTest` = `Microsoft.NET.Test.Sdk` + `MSTest.TestAdapter` + `MSTest.TestFramework` + `MSTest.Analyzers` (+ TrxReport e CodeCoverage a partir da 3.8).
-- Perfis de extensões MTP no SDK (`TestingExtensionsProfile`): `None`, `Default` (Code Coverage, TRX, Azure DevOps, GitHub Actions), `AllMicrosoft` (+ Crash/Hang dump, Fakes, Hot Reload, HTML, Retry; licença restritiva em algumas).
+- Perfis de extensões MTP no SDK (`TestingExtensionsProfile`): `None`, `Default` (perfil usado se a propriedade não for definida; Code Coverage, TRX e, a partir do MSTest.Sdk **4.3.0**, Azure DevOps e GitHub Actions), `AllMicrosoft` (+ Crash/Hang dump, Fakes, Hot Reload, HTML, Retry; licença restritiva em algumas).
 - Defina `EnableMSTestRunner`/`TestingPlatformDotnetTestSupport` no `Directory.Build.props` para toda a solution.
 - Plataformas: .NET 8+, .NET Framework 4.6.2+, UWP/WinUI (com `UITestMethod`), Native AOT (conjunto limitado), WebAssembly (limitado). 
 - **MSTest.Analyzers** (MSTESTxxxx) detectam erros de assinatura de lifecycle, `DataRow` incompatível, `DataRow` duplicado etc.

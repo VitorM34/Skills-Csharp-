@@ -55,7 +55,7 @@ public class PrimeService_IsPrimeShould                 // classe: Classe_Métod
 4. **Teste minimamente passante:** a entrada mais simples que verifica o comportamento; sem propriedades extras no modelo.
 5. **Sem magic strings:** `const string MAXIMUM_RESULT = "1001";`.
 6. **Sem lógica no teste** (`if/for/while/switch`, concatenação manual): use `[Theory]` ou divida.
-7. **Helpers em vez de Setup/Teardown** (`CreateDefaultStringCalculator()`): tudo visível no teste, menos estado compartilhado. (`SetUp/TearDown` não existem no xUnit 2.x+; no xUnit use o construtor se precisar, com cuidado.)
+7. **Helpers em vez de Setup/Teardown** (`CreateDefaultStringCalculator()`): tudo visível no teste, menos estado compartilhado. (A doc diz "prefira helpers aos atributos `Setup`/`Teardown` quando os testes têm requisitos de setup diferentes". A observação de que o xUnit não tem `SetUp/TearDown` e usa o construtor é CONVENÇÃO desta skill, fora da página lida; ver `dotnet-xunit`.)
 8. **Não teste métodos privados:** teste o método público que os usa (o resultado público é o que importa).
 9. **Seams para estáticos** (`DateTime.Now`, relógio, aleatório): encapsule em interface injetável (a doc usa `IDateTimeProvider`) e controle o valor no teste. Sem seam o teste passa/falha conforme o dia da semana.
 10. **Cobertura:** alta cobertura não indica qualidade; metas ambiciosas (95%) são contraproducentes.
