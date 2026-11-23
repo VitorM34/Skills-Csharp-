@@ -12,14 +12,16 @@ Regra de ouro: só afirmar o que a doc oficial diz (fontes no fim); fora disso, 
 - Interface = **contrato**: métodos, propriedades, eventos, indexadores. Não pode ter campos de instância, construtores de instância nem finalizers. Membros são `public` por padrão (pode usar `internal` etc.).
 - Convenção: nome começa com `I` (`ILogger`).
 - Classe/struct lista interfaces após `:`; **deve implementar todos os membros** (exceto os que têm implementação default). Pode implementar várias; herda no máximo uma classe base.
-- **Implementação explícita** (`double IMetric.GetDistance()`): usar quando duas interfaces têm o mesmo membro ou para manter a API pública limpa. Só acessível via variável do tipo da interface. Obrigatória quando a assinatura usa tipos `internal` e a classe é pública.
+- **Implementação explícita** (`double IMetric.GetDistance()`): usar para resolver o caso de duas interfaces com membros **diferentes de mesmo nome** (a doc: com a *mesma* assinatura, por padrão uma só implementação atende as duas) ou para manter a API pública limpa. Só acessível via variável do tipo da interface. Obrigatória quando a assinatura usa tipos `internal` e a classe é pública.
 - **Herança de interface:** quem implementa `IShape : IDrawable` implementa os membros de ambas.
 - **Interface vs classe abstrata:**
   - Classe abstrata → tipos relacionados que compartilham estado (campos), construtores, membros não públicos; permite adicionar membros com comportamento padrão sem quebrar derivados.
-  - Interface → contrato que atravessa hierarquias não relacionadas ou múltiplos contratos; única opção comum para structs.
+  - Interface → contrato que atravessa hierarquias não relacionadas ou múltiplos contratos; única opção comum para structs (esta última parte não foi reconferida; a doc também diz que a classe abstrata permite acrescentar comportamento padrão — não relido nesta revisão).
+  - A página da palavra-chave `interface` nota que membros **com implementação default** são `private` por padrão (membros abstratos são implicitamente `public`) e que campos de instância/auto-propriedades de instância não são permitidos; a página fala de recursos de versões novas do C# — confira a versão do projeto antes de recomendar.
 - Recursos avançados: *default interface members* e *static abstract members*.
 
 ## Framework Design Guidelines (Interface Design)
+(A página das FDG carrega o aviso de que é uma republicação de 2008; as regras abaixo conferem com ela.)
 
 - ✔ Defina interface quando um conjunto de tipos (inclusive value types) precisa de API comum.
 - ✔ Considere interface para dar a funcionalidade a tipos que já herdam de outro.

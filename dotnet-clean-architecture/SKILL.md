@@ -9,7 +9,7 @@ Só afirmar o que a doc oficial diz (fontes no fim).
 
 ## Do N-Layer tradicional à Clean Architecture
 - N-Layer clássico: UI → BLL → DAL. Desvantagem citada pela doc: dependências de compilação vão de cima para baixo, então a lógica de negócio **depende de detalhes de acesso a dados**; testar exige banco.
-- **Clean Architecture** (= Hexagonal / Ports-and-Adapters / Onion): inverte a dependência. O **Application Core** não depende de nada; **Infrastructure** e **UI** dependem do Core (e, idealmente, não um do outro). Abstrações (interfaces) ficam no Core; Infrastructure as implementa. Em runtime a ligação é feita por **DI**.
+- **Clean Architecture** (= Hexagonal / Ports-and-Adapters / Onion): inverte a dependência. O **Application Core** não depende de outras camadas da aplicação (palavras da doc; "não depende de nada" é aproximação — o Core ainda usa a BCL); **Infrastructure** e **UI** dependem do Core (e, idealmente, não um do outro). Abstrações (interfaces) ficam no Core; Infrastructure as implementa. Em runtime a ligação é feita por **DI**.
 - Benefícios da doc: núcleo testável sem infraestrutura, trocar implementação (SQL → nuvem) e usar fakes em testes. A doc considera essa a forma mais apropriada de estruturar monolitos não triviais em ASP.NET Core.
 
 ## O que vai em cada projeto (doc)
@@ -22,7 +22,7 @@ Só afirmar o que a doc oficial diz (fontes no fim).
 
 - A UI interage com infraestrutura **estritamente por interfaces do Core**; sem `new` nem chamadas estáticas a tipos da Infrastructure.
 - **Composition root** (`Program.cs`): liga implementações às interfaces. A doc admite que a UI referencie Infrastructure só por isso; limite as referências de tipo a esse ponto.
-- Testes: unitários no Core (isolado); integração para Infrastructure.
+- Testes: unitários no Core (isolado); integração para Infrastructure (este último só aparece nas legendas das figuras da doc, não no texto).
 
 ```csharp
 // Core
@@ -45,7 +45,7 @@ Um projeto único "all-in-one" (pastas Models/Views/Controllers/Data/Services) �
 ## Checklist de revisão
 | # | Verificar |
 |---|---|
-| 1 | Core sem referência a Infrastructure, EF Core ou ASP.NET |
+| 1 | Core sem referência a Infrastructure (doc); sem EF Core/ASP.NET é a leitura usual de "persistence ignorance" (CONVENÇÃO) |
 | 2 | Interfaces de acesso a dados no Core; implementações na Infrastructure |
 | 3 | UI sem `new`/estático para tipos da Infrastructure (exceto composition root) |
 | 4 | `DbContext` e migrations só na Infrastructure |

@@ -9,6 +9,8 @@ description: Projetar, implementar e revisar um monolito modular em .NET / ASP.N
 Na pesquisa feita, o Microsoft Learn **não tem um guia oficial de "monolito modular"**; só há um episódio em vídeo (*On .NET Live: Modular Monoliths with ASP.NET Core*). O que a documentação oficial **fornece** são os princípios que sustentam o padrão: *separation of concerns*, *encapsulation*, *dependency inversion*, *explicit dependencies*, *single responsibility*, *persistence ignorance*, *bounded contexts*, arquitetura em camadas / Clean Architecture e a advertência de que microserviços custam complexidade.
 Esta skill separa **[OFICIAL]** (cada afirmação com base nas páginas citadas) de **[CONVENÇÃO]** (prática comum da comunidade, **não** documentada pela Microsoft: apresente como sugestão e diga isso ao usuário).
 
+**Nota de revisão (2026-11):** reconferidos em texto a lista de princípios, a razão para não usar microserviços e a página *common-web-application-architectures* (que **não** menciona monolito modular — descreve monolito all-in-one/em camadas e Clean Architecture). A afirmação "o Learn não tem guia de monolito modular" **não foi verificada por busca** nesta revisão; trate-a como "não encontrei" e confirme. Os detalhes de *persistence ignorance* e *encapsulation* (item 3 e 7 abaixo) não foram relidos linha a linha.
+
 ## [OFICIAL] Fundamentos
 1. **Monolito** = aplicação autocontida, implantada como uma unidade; pode ter vários projetos/camadas (N-Layer) e ainda ser um único deploy. Camadas = separação lógica; tiers = separação física.
 2. **Separation of concerns:** regras de negócio separadas de infraestrutura e UI; o núcleo de negócio idealmente num projeto que **não depende** dos outros.
