@@ -19,13 +19,13 @@ Regra de ouro: **só afirme o que está na documentação oficial** (fontes no f
 ## Como escrever (implementação)
 
 1. Assinatura: modificador `async`, retorno `Task` (sem valor) ou `Task<T>` (com valor), nome terminando em `Async` (`GetUserAsync`).
-2. `ValueTask<T>` só quando o método frequentemente completa de forma síncrona/cacheada em caminho crítico (evita alocação). Padrão continua sendo `Task`.
+2. `ValueTask<T>` só quando o método frequentemente completa de forma síncrona/cacheada em caminho crítico (evita alocação). Padrão continua sendo `Task`. *(A página *async-scenarios* só tem uma seção curta "Consider using ValueTask" — `Task` é tipo de referência e alocar importa em loops apertados — e remete aos *generalized async return types*; o critério "completa frequentemente de forma síncrona" e "padrão é `Task`" aqui são CONVENÇÃO/confirme na doc de tipos de retorno.)*
 3. `async void` **somente** em event handlers. Em handler, mantenha o código mínimo e delegue para um método `async Task` testável.
 4. Todo método `async` deve ter pelo menos um `await` (senão roda síncrono e o compilador avisa).
 5. Aceite `CancellationToken` como último parâmetro em operações longas/I/O e repasse adiante para as APIs chamadas.
-6. Cancelar: preferir `ct.ThrowIfCancellationRequested()` (a task vai para o estado *Canceled*). Apenas retornar do delegate deixa a task como *RanToCompletion*. Passe o **mesmo token** também ao `Task.Run`.
-7. Exceções: o `await` relança a **primeira** exceção interna (não `AggregateException`). Validação de argumentos deve falhar **de forma síncrona** em métodos que retornam Task (doc: "Exceptions in task-returning methods").
-8. Em `async`, não declare parâmetros `in`, `ref` ou `out`.
+6. Cancelar: preferir `ct.ThrowIfCancellationRequested()` (a task vai para o estado *Canceled*). Apenas retornar do delegate deixa a task como *RanToCompletion*. Passe o **mesmo token** também ao `Task.Run` (o exemplo da doc faz isso; para a task terminar em *Canceled*, a `OperationCanceledException` precisa carregar o mesmo token e ele estar cancelado — a página não diz que passar o token é obrigatório).
+7. Exceções: o `await` relança a **primeira** exceção interna (não `AggregateException`) — fonte: artigo de Cleary (MSDN Magazine 2013), não a página *async-scenarios*; `Wait`/`Result` embrulham em `AggregateException`. Validação de argumentos falhar **de forma síncrona** em métodos que retornam Task: **não confirmado** nas páginas lidas nesta revisão (vem de `references/official-notes.md`; confirme na doc antes de citar).
+8. Em `async`, não declare parâmetros `in`, `ref` ou `out` (fonte: página do modelo TAP). O sufixo `Async` também vem dessa página ("por convenção"). A doc diz que `async void` é usado *principalmente* para event handlers; a regra "somente em event handlers" é o título de uma seção de *async-scenarios*.
 
 ```csharp
 // I/O-bound
