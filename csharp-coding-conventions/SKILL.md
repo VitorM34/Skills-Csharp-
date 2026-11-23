@@ -20,9 +20,9 @@ Fonte: convenções da equipe `dotnet/docs`, adotadas das diretrizes do .NET Run
 | Enum | substantivo singular; **plural** para `[Flags]` |
 | Parâmetros de construtor primário | **camelCase** em `class`/`struct`; **PascalCase** em `record` (viram propriedades públicas) |
 | Parâmetro de tipo genérico | descritivo com prefixo `T` (`TSession`); `T` sozinho se único e óbvio |
-| Método assíncrono (retorna Task/ValueTask) | sufixo **`Async`** (exceto event handlers, actions, contratos de interface/base) |
-| Exceção | sufixo `Exception` |
-| Coleção | sufixo `Collection`/`Dictionary`; ver `csharp-collections` |
+| Método assíncrono (retorna Task/ValueTask) | sufixo **`Async`** — fonte: página do modelo TAP (`csharp-async-await`), **não** *identifier-names* nem *coding-conventions*; as exceções (event handlers, actions, contratos) são convenção da biblioteca |
+| Exceção | sufixo `Exception` (não conferido nas duas páginas desta revisão; vem das Framework Design Guidelines) |
+| Coleção | sufixo `Collection`/`Dictionary`; ver `csharp-collections` (não conferido nas duas páginas desta revisão) |
 - Nomes significativos e descritivos; **clareza > brevidade**; evite abreviações e acrônimos (exceto os amplamente aceitos); evite nome de uma letra (exceto contador de loop); **sem dois `_` consecutivos**.
 - Namespace descritivo em notação de domínio reverso; nome de assembly reflete o propósito.
 - Records posicionais: parâmetros em PascalCase.
@@ -34,10 +34,10 @@ Fonte: convenções da equipe `dotnet/docs`, adotadas das diretrizes do .NET Run
 - Palavras-chave de tipo: `string`, `int` (não `String`, `Int32`). Prefira `int` a tipos unsigned.
 - **`var`** só quando o tipo é óbvio no lado direito (`new`, cast explícito, literal); não use o nome da variável para indicar tipo; não use `var` no `foreach` (tipo do elemento nem sempre óbvio); `var` no `for`; em LINQ, tipagem implícita é preferida.
 - **Strings:** interpolação (`$"{a}, {b}"`) para concatenar curtas; `StringBuilder` em loops; raw string literals em vez de escapes/verbatim; interpolação baseada em expressão (não posicional).
-- **Construtores:** `required` em vez de construtor para forçar inicialização; primary constructor.
+- **Construtores:** `required` em vez de construtor para forçar inicialização (doc). Primary constructor: a doc só dá regra de **nome** dos parâmetros; preferir usá-lo é CONVENÇÃO (a página só pede "recursos modernos sempre que possível").
 - **Coleções:** collection expressions `string[] v = ["a", "b"];`.
 - **Delegates:** `Func<>`/`Action<>` em vez de declarar tipos; sintaxe concisa.
-- **`using`:** use a declaração `using var x = ...;`; `using` diretives **fora** do namespace; namespace **file-scoped** (`namespace Foo;`).
+- **`using`:** use a sintaxe `using` sem chaves (`using var x = ...;`; a doc diz "new using syntax"); namespace file-scoped é pedido para os **exemplos** da doc; `using` diretives **fora** do namespace; namespace **file-scoped** (`namespace Foo;`).
 - **Operadores:** `&&`/`||` em vez de `&`/`|` em comparações.
 - **`new`:** forma concisa (`var x = new T();` ou `T x = new();`); inicializadores de objeto.
 - **Estáticos:** chame por `NomeDaClasse.Membro`.
@@ -46,6 +46,10 @@ Fonte: convenções da equipe `dotnet/docs`, adotadas das diretrizes do .NET Run
 
 ## Layout
 4 espaços (sem tabs), chaves estilo **Allman** (cada chave em linha própria), uma instrução/declaração por linha, linha em branco entre métodos/propriedades, parênteses para deixar cláusulas claras, quebra de linha **antes** de operadores binários. Comentários: `//` curtos em linha própria, iniciam com maiúscula e terminam com ponto; XML doc (`///`) para membros públicos; evite `/* */` longos.
+
+A página também limita linhas a **65 caracteres** — regra pensada para os exemplos publicados na doc; em projeto real siga o limite do `.editorconfig`.
+
+**Não conferido nesta revisão** (não estava nas duas páginas lidas): namespace em domínio reverso/nome de assembly, "capture só exceções que sabe tratar", "interpolação baseada em expressão", "em LINQ a tipagem implícita é preferida" e a origem "diretrizes do .NET Runtime/Roslyn" citada no topo. Trate como convenção até confirmar.
 
 ## Ferramentas
 `.editorconfig` + code analysis (naming rules, style rules) para impor; o `.editorconfig` do `dotnet/docs` serve de ponto de partida. Segurança: *Secure coding guidelines*.
