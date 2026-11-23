@@ -5,7 +5,7 @@ description: Fluxo de trabalho para implementar uma feature .NET/ASP.NET Core po
 
 # Implementar uma feature ponta a ponta
 
-**Proveniência:** esta skill **orquestra**; as regras técnicas vivem nas skills especialistas (todas baseadas na doc oficial). Do que é **oficial** aqui: (1) a recomendação *Minimal APIs para projetos novos, controllers em casos específicos* (doc *APIs overview*); (2) a sequência dos tutoriais oficiais (*Create a minimal API* / *controller-based web API*): projeto → pacotes → **model → DbContext → registrar contexto → endpoints (POST/GET/PUT/PATCH/DELETE) → DTO contra over-posting → teste**. A **ordem refinada abaixo e os gates são CONVENÇÃO** (marcados). Convenções locais do projeto vencem (`.editorconfig`, arquitetura existente).
+**Proveniência:** esta skill **orquestra**; as regras técnicas vivem nas skills especialistas (todas baseadas na doc oficial). Do que é **oficial** aqui: (1) a recomendação *Minimal APIs para projetos novos, controllers em casos específicos* (doc *APIs overview*); (2) a sequência dos tutoriais oficiais (*Create a minimal API* / *controller-based web API*): projeto → pacotes → **model → DbContext → registrar contexto → endpoints (POST/GET/PUT/PATCH/DELETE) → DTO contra over-posting → teste** (a parte até os endpoints foi conferida em texto; o DTO ao final vem de resumo das páginas, que são muito longas). A **ordem refinada abaixo e os gates são CONVENÇÃO** (marcados). Convenções locais do projeto vencem (`.editorconfig`, arquitetura existente).
 
 ## Passo 0 — Descobrir antes de escrever
 Leia (não presuma): `*.csproj` (TFM, pacotes, `Nullable`), `Program.cs`, `appsettings*.json`, estrutura de pastas/projetos, um feature existente parecido, testes existentes, `Directory.Build.props`/`.editorconfig`. Identifique:
@@ -20,9 +20,9 @@ Se houver ambiguidade que muda o desenho (provider, auth, síncrono × evento), 
 
 ## Fluxo (CONVENÇÃO de ordem; cada fase delega)
 ### 1. Contrato primeiro
-- Endpoints, verbos e status codes (`aspnet-http-endpoints`): POST→**201 + header `Location`** (`CreatedAtAction`), PUT/PATCH/DELETE→**204 No Content**, GET por id→200 ou **404** se não existir (todos conforme os tutoriais oficiais).
-- **DTOs de entrada/saída** (`dotnet-dto-review`): o tutorial oficial introduz o DTO por último ("Prevent over-posting"), mas a doc diz que apps de produção limitam entrada/saída a um subconjunto do modelo (segurança, ocultar propriedades, reduzir payload) — por isso **defina o DTO já aqui**, nunca exponha a entidade.
-- **Validação** (`aspnet-validation`; Minimal API exige `AddValidation()`), erros como `ProblemDetails` (`aspnet-error-handling`).
+- Endpoints, verbos e status codes (`aspnet-http-endpoints`): POST→**201** (tutorial de controllers: `CreatedAtAction` com header `Location`; tutorial Minimal API: `Results.Created(uri, ...)` — o header `Location` ali não foi confirmado em texto), PUT/DELETE→**204 No Content** (confirmado nos dois tutoriais; PATCH no tutorial Minimal API não foi relido), GET por id→200 ou **404** se não existir.
+- **DTOs de entrada/saída** (`dotnet-dto-review`): os tutoriais oficiais tratam over-posting numa seção "Prevent over-posting" posterior aos endpoints (o tutorial Minimal API já usa um `TodoPatchDto` na seção do PATCH); a frase de que apps de produção limitam entrada/saída a um subconjunto do modelo só foi lida em resumo, não em texto integral. Por isso **defina o DTO já aqui** (CONVENÇÃO), nunca exponha a entidade.
+- **Validação** (`aspnet-validation`; a skill diz que Minimal API exige `AddValidation()` — **não confirmado** nas páginas lidas nesta revisão; confirme em `aspnet-validation`), erros como `ProblemDetails` (`aspnet-error-handling`).
 ### 2. Modelo de domínio
 `dotnet-model-review` (+ `csharp-nullable-references`, `csharp-modern-features`, `csharp-types-oop`). Se for DDD: `dotnet-ddd-tactical`.
 ### 3. Persistência
