@@ -55,6 +55,9 @@ Alternativa: começar monolito (ver `dotnet-modular-monolith`) e extrair depois.
 | 9 | Config externalizada; segurança tratada no gateway/plataforma |
 | 10 | Há real necessidade (escala/time/independência) que justifique o custo |
 
+## Nota de revisão (2026-11)
+Conferidos em texto: definição, dados próprios, gateway sem conhecimento de domínio, listas de benefícios/desafios, MassTransit/NServiceBus, mTLS, chaos engineering e os 10 antipadrões (todos na página *architecture-styles/microservices*), e as razões de "quando não" (*common-web-application-architectures*). A página *design/patterns* só lista padrões e a de *domain-analysis* trata de análise de domínio: elas **não** contêm essas listas. A afirmação "dados privados" não está em *domain-analysis*.
+
 ## Fontes oficiais
 - Microservices architecture style: https://learn.microsoft.com/en-us/azure/architecture/guide/architecture-styles/microservices
 - Common web application architectures: https://learn.microsoft.com/en-us/dotnet/architecture/modern-web-apps-azure/common-web-application-architectures
