@@ -10,10 +10,11 @@ Só afirmar o que a doc oficial diz (fontes no fim). DTOs: `dotnet-dto-review`. 
 ## Minimal APIs (.NET 10): precisa registrar
 ```csharp
 builder.Services.AddValidation();   // Microsoft.Extensions.Validation
+// using System.ComponentModel.DataAnnotations;
 public record Product([Required] string Name, [Range(1, 1000)] int Quantity);
 ```
 - **Sem `AddValidation()` NENHUMA validação automática roda**: a entrada inválida chega ao handler, sem exceção nem log. (Checklist #1 de revisão.)
-- Validação acontece **antes** do handler, para query, header e corpo; falha → `400` com detalhes (customizar via `IProblemDetailsService`). Desligar por endpoint: `.DisableValidation()`.
+- Validação acontece **antes** do handler, para query, header e corpo; falha → `400` com detalhes (customizar via `IProblemDetailsService`). Desligar por endpoint: `.DisableValidation()` (aparece na página *Minimal APIs quick reference*, seção de validação).
 - Usa **source generator** que gera metadados para os tipos validáveis no assembly onde `AddValidation` é chamado. Para tipos em **outro assembly** há registro específico (ver "Register validation across assemblies"). Falta de metadados não gera exceção.
 - Tipos de modelo **não** podem ser declarados em arquivos `.razor`; declare em `.cs`.
 - Objetos aninhados/coleções: anote o tipo raiz com `[ValidatableType]` (tipos alcançáveis são descobertos). Em apps .NET 10, `ValidatableTypeAttribute` e `SkipValidationAttribute` (pacote `Microsoft.Extensions.Validation`) são **experimentais** (aviso ASP0029; pode suprimir com `NoWarn`).
@@ -31,9 +32,11 @@ public record Product([Required] string Name, [Range(1, 1000)] int Quantity);
 - Também existem `[Remote]`, validação client-side (unobtrusive), `ValidationResult`, limites de erros máximos/recursão.
 
 ## Regras customizadas
-- **Atributo customizado:** herde de `ValidationAttribute` e sobrescreva `IsValid(object? value, ValidationContext ctx)`; retorne `ValidationResult` com mensagem em caso de erro. Para resolver serviços da DI use `validationContext.GetService<T>()` (ou `GetRequiredService<T>()`) — o serviço precisa estar registrado.
+- **Atributo customizado:** herde de `ValidationAttribute` e sobrescreva `IsValid(object? value, ValidationContext ctx)`; retorne `ValidationResult` com mensagem em caso de erro. Para resolver serviços da DI use `validationContext.GetService<T>()` (ou `GetRequiredService<T>()`) — o serviço precisa estar registrado (`GetService<T>`/`GetRequiredService<T>` são extensões de `Microsoft.Extensions.DependencyInjection`; documentado em *Validation in ASP.NET Core* para Minimal APIs/Blazor; a página de validação do MVC **não** mostra isso, o exemplo dela usa `validationContext.ObjectInstance`, então em MVC confirme na versão instalada).
 - **Validação de classe:** implemente `IValidatableObject` (`Validate(ValidationContext)` retornando `ValidationResult`s). O atributo customizado serve a um tipo específico; `IValidatableObject` é a opção de nível de classe.
 - No .NET 11 há validação assíncrona (`IAsyncValidatableObject`) e localização de mensagens; **não** assuma isso em projetos .NET 10.
+
+**Nota de revisão (2026-11, C#):** `record` posicional com atributos nos parâmetros, `IsValid(object?, ValidationContext)` retornando `ValidationResult?`/`ValidationResult.Success` e `IValidatableObject.Validate` conferidos nas páginas *Validation in ASP.NET Core* e *Minimal APIs*; snippets compilam como fragmentos (exigem `using System.ComponentModel.DataAnnotations`).
 
 ## Checklist de revisão
 | # | Verificar |
