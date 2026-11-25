@@ -116,6 +116,8 @@ Use o diff (`git diff`, PR) ou os arquivos indicados. Se não houver nada indica
 | PR de upgrade de `net8.0`/`net9.0` → `net10.0`, warnings `ASPDEPR*`, mudança de TFM/pacotes | `dotnet-version-migration` |
 | `.github/workflows/*.yml`, `azure-pipelines.yml`, `Dockerfile`, scripts de deploy/migrations | `dotnet-ci-cd` (+ `aspnet-hosting-deployment`, `dotnet-security-review`) |
 
+> Nota de revisão (2026-11, C#): skill de orquestração, sem regras ou snippets próprios; os nomes de APIs/atributos usados como "sinais" (`IMeterFactory`/`Meter`/`ActivitySource`, `PublishAot`, `IsAotCompatible`, `CreateSlimBuilder`, `ASPDEPR*`, `.slnx`) existem nas docs conferidas para as skills correspondentes; os demais sinais não foram conferidos aqui.
+
 ## Passo 3: executar
 1. Para cada skill selecionada, aplique **o checklist dela** apenas aos trechos relevantes.
 2. Não invente regras fora das skills. Se algo parecer errado mas nenhuma skill cobre, busque na documentação oficial (learn.microsoft.com) antes de afirmar, e diga que está fora das skills.
