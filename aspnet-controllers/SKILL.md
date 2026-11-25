@@ -12,6 +12,8 @@ Só afirmar o que a doc oficial diz (fontes no fim). Verbos/status/binding: `asp
 ```csharp
 [Route("api/[controller]")]
 [ApiController]
+// Trecho parcial: TodoItem, TodoItemDTO, ItemToDTO e TodoItemExists vêm do tutorial (não mostrados);
+// requer using Microsoft.EntityFrameworkCore (DbUpdateConcurrencyException).
 public class TodoItemsController : ControllerBase
 {
     private readonly TodoContext _context;
@@ -60,11 +62,11 @@ Registro do contexto em `Program.cs` por DI (`AddDbContext`) e `builder.Services
    - **inferência de binding source**: serviço registrado → `[FromServices]`; complexo → `[FromBody]`; `IFormFile(Collection)` → `[FromForm]`; nome presente no template → `[FromRoute]`; demais → `[FromQuery]`;
    - inferência `multipart/form-data`;
    - **ProblemDetails** (RFC 7807) para respostas de erro (status ≥ 400), ex.: `NotFound()` gera corpo `ProblemDetails`.
-   Pode ser aplicado por controller, em vários (classe base) ou no assembly.
+   Pode ser aplicado por controller, em vários (classe base) ou no assembly (`[assembly: ApiController]`; **no nível de assembly não há como optar por sair em controllers individuais**, segundo a doc).
 4. **Tipos de retorno da action:**
    - *Tipo específico* (`Task<List<Product>>`): suficiente quando não há condições alternativas.
    - `IActionResult`: vários resultados possíveis, sem tipo de sucesso inferido (precisa `[ProducesResponseType(200, Type=...)]`).
-   - **`ActionResult<T>`** (recomendado quando há 200 + erros): permite retornar `T` ou `ActionResult`; infere o tipo de sucesso, dispensa `Type =` no `[ProducesResponseType]`. Não funciona com interface como `T` (ex.: `IEnumerable<Product>` → converta, `ToList()`).
+   - **`ActionResult<T>`** (a doc não o chama de "recomendado" nas partes lidas; é a escolha usual quando há 200 + erros): permite retornar `T` ou `ActionResult`; infere o tipo de sucesso, dispensa `Type =` no `[ProducesResponseType]`. Não funciona com interface como `T` (ex.: `IEnumerable<Product>` → converta, `ToList()`).
    - `HttpResults` (`Results<NotFound, Ok<Product>>`, `TypedResults`): compartilháveis com Minimal APIs, mas **não** usam formatters (sem content negotiation).
 5. `IEnumerable<T>` é bufferizado; prefira `IAsyncEnumerable<T>` para iteração assíncrona (com `System.Text.Json` há streaming).
 6. Métodos úteis de `ControllerBase`: `Ok`, `NotFound`, `BadRequest`, `NoContent`, `CreatedAtAction`, `Problem`, `ValidationProblem`.
