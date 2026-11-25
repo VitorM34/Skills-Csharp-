@@ -10,6 +10,7 @@ Só afirmar o que a doc oficial diz (fontes no fim). Ordem de middleware: `aspne
 ## Rate limiting (`Microsoft.AspNetCore.RateLimiting`)
 Evita abuso e sobrecarga e garante uso justo (importante em APIs públicas). **Não é solução completa contra DDoS**: a doc recomenda serviço de proteção DDoS (ex.: WAF da nuvem) em conjunto. **Os contadores ficam em memória em cada instância**: com N instâncias o limite efetivo é N × o configurado (inclusive o global); para um limite único, aplique em camada compartilhada (gateway/proxy). **Apps com rate limiting devem ser testados sob carga e revisados antes do deploy.**
 ```csharp
+// using System.Threading.RateLimiting; using Microsoft.AspNetCore.RateLimiting;
 builder.Services.AddRateLimiter(options =>
 {
     options.AddFixedWindowLimiter("fixed", o => { o.PermitLimit = 4; o.Window = TimeSpan.FromSeconds(12); o.QueueLimit = 2; });
