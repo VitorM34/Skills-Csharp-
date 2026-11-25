@@ -7,6 +7,8 @@ description: Implementar e revisar concorrência e paralelismo em .NET - threads
 
 Só afirmar o que a doc oficial diz (fontes no fim). **async/await e Task**: `csharp-async-await`. Tarefas em segundo plano: `aspnet-hosted-services`. Coleções: `csharp-collections`.
 
+Nota de revisão (2026-11, C#): conferidos contra a doc oficial (best practices, lock statement, overview de primitivas, thread pool, Channels, when-to-use thread-safe collection, data parallelism): Thread.Abort/PlatformNotSupportedException (.NET 5+), lock em tipos/`this`/strings, `System.Threading.Lock` (.NET 9/C# 13, `EnterScope()`), `await` proibido em `lock`, Interlocked (`Add`/`CompareExchange`), Mutex nomeado × SemaphoreSlim só intra-processo, thread pool (3 exceções, mínimos), Channels (`Wait` padrão, `ChannelClosedException`, `ValueTask`), ConcurrentQueue/Dictionary/BlockingCollection. Não confirmados nas páginas lidas (tratar como CONVENÇÃO até reconferir): `ConcurrentBag<T>` "para dados não ordenados" (a doc lida só compara desempenho: mais lento em produtor-consumidor puro, mais rápido em misto); "não use `Parallel` para I/O-bound" e o how-to "speed up small loop bodies"; `SemaphoreSlim.WaitAsync` (API conhecida, página de API não aberta).
+
 ## Princípios (managed threading best practices)
 - Multithreading exige programação cuidadosa; **para a maioria das tarefas, enfileire trabalho no ThreadPool** (via `Task`/TPL).
 - **Race condition:** resultado depende de qual thread chega primeiro (ex.: `objCt++` em campo estático = carregar/incrementar/gravar não é atômico). Ao escrever cada linha, pense no que ocorre se a thread for **preemptada** antes dela.
