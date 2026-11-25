@@ -13,7 +13,7 @@ Só afirmar o que a doc oficial diz (fontes no fim). Escolha de comunicação en
 
 ## Contrato e geração
 - **Contract-first**: o `.proto` (Protocol Buffers como IDL) define mensagens e serviços. `<Protobuf Include="..." GrpcServices="Server|Client|Both|None">` gera as classes (base de serviço e/ou cliente). Pacote `Grpc.Tools` é necessário em servidor e cliente; **`Grpc.AspNetCore`** (metapacote) já o inclui; em clientes referencie `Grpc.Tools` com `PrivateAssets="All"` (não é necessário em runtime).
-- gRPC **não faz binding** de partes da requisição em argumentos distintos (como actions): **um único objeto de mensagem** por método; vários valores = vários campos.
+- Métodos gRPC "sempre têm um argumento de mensagem" para os dados de entrada (página *Services*); a ideia de que "não há binding por partes como em actions" é leitura desta skill; vários valores = vários campos. Tipos de `GrpcServices`: `Both` (padrão se omitido), `Server`, `Client`, `None`.
 
 ## Serviços (`Grpc.AspNetCore`)
 - Implemente a classe gerada `Greeter.GreeterBase` e registre com `app.MapGrpcService<GreeterService>()`; a base padrão devolve `UNIMPLEMENTED`.
@@ -30,7 +30,8 @@ Só afirmar o que a doc oficial diz (fontes no fim). Escolha de comunicação en
 - **Retries** (`Grpc.Net.Client` ≥ 2.36.0): `RpcException` com detalhes; política por método (`MethodConfig`, `RetryPolicy`: `MaxAttempts` (limite do canal `MaxRetryAttempts` = 5), `InitialBackoff`, `BackoffMultiplier`, `RetryableStatusCodes`); atraso **aleatório** entre 0 e o backoff atual. **Streaming** server/bidirecional **não faz retry depois da 1ª mensagem recebida** (refaça manualmente). Retry só em chamadas seguras/idempotentes (ver `dotnet-distributed-patterns`).
 
 ## Erros
-- Servidor sempre retorna um **status** (`OK` ao concluir). Lance `RpcException` com `StatusCode` adequado (`INVALID_ARGUMENT` para dados faltantes). Cliente trata `RpcException` (falha no servidor com código, ou erro interno como `UNAVAILABLE`). **Rich error handling:** `Google.Rpc.Status` com `details` (`Any`; use os payloads padrão do modelo de erro do Google); erros vão em **headers**, limite típico de **8 KB**.
+- Servidor sempre retorna um **status** (`OK` ao concluir). Lance `RpcException` com `StatusCode` adequado (`INVALID_ARGUMENT` para dados faltantes). Cliente trata `RpcException` (falha no servidor com código, ou erro interno como `UNAVAILABLE`). **Rich error handling:** `Google.Rpc.Status` (pacote `Grpc.StatusProto`; tipo diferente de `Grpc.Core.Status`) com `details` (`Any`; payloads padrão como `BadRequest`, `ErrorInfo`); erros vão em **headers**, limite típico de **8 KB**. Exceção não-`RpcException` vira `UNKNOWN`.
+- **JSON transcoding** (.NET 7+, pacote `Microsoft.AspNetCore.Grpc.JsonTranscoding`) limita-se a **server streaming**; **gRPC-Web** não suporta client streaming nem bidirecional (server streaming sim).
 
 ## Segurança
 - **Só escute e responda em portas seguras (TLS)**; proxy de terminação TLS é opção, pesando o risco do tráfego sem TLS na rede privada.
