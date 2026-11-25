@@ -7,6 +7,8 @@ description: Revisar e aplicar boas práticas de desempenho e correção em apps
 
 Só afirmar o que a doc oficial diz (fontes no fim). Medir antes de otimizar: a doc recomenda **medir o impacto** antes de adotar técnicas de alto desempenho (complexidade pode não compensar).
 
+**Nota de revisão (2026-11):** a página *Best practices* foi conferida em texto (bloqueio, `Task.Run`, locks, `IEnumerable` síncrono, regras de `HttpContext`, corpo/`ReadFormAsync`/`ContentLength`, headers após o corpo, `HttpClientFactory`, "exceções devem ser raras", IIS in-process desde o 3.0, `System.Text.Json` padrão desde o 3.0). A doc recomenda *medir o impacto* das técnicas de alto desempenho; a frase "medir antes de otimizar" é paráfrase. Os itens de "Dados e I/O" (no-tracking, N+1, queries compiladas) vêm de outras skills e **não** foram reconferidos aqui. A página lida é a versão mais recente (11.0).
+
 ## Princípios
 - **Cache agressivo** (ver `aspnet-caching`); **entenda os hot code paths** (código chamado por quase toda requisição ou em loops) e mantenha-os rápidos; **use a versão mais recente** do ASP.NET Core; **comprima respostas** e **minifique assets**.
 
