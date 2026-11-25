@@ -13,7 +13,7 @@ builder.Services.AddHealthChecks();
 app.MapHealthChecks("/healthz");
 ```
 - Sem checks registrados, a app é "saudável" se **responde** no endpoint; o writer padrão devolve **texto puro** com o `HealthStatus` (Healthy/Degraded/Unhealthy).
-- **Prefira `MapHealthChecks` a `UseHealthChecks`**: integra com middleware que reconhece endpoints (autorização, host, CORS) e dá controle fino.
+- `MapHealthChecks` em vez de `UseHealthChecks`: a doc compara os dois ("usando `MapHealthChecks` você pode usar middleware que reconhece endpoints, como autorização"; `UseHealthChecks` serve "principalmente para configurar o middleware no pipeline"). Que seja "preferível" é leitura desta skill; integra com autorização, host e CORS.
 - Docker `HEALTHCHECK`: precisa de `curl`/`wget` na imagem (`curl` não vem nas imagens Linux do .NET; Alpine tem `wget`).
 
 ## Criar checks
@@ -23,7 +23,7 @@ app.MapHealthChecks("/healthz");
 - Bibliotecas: exponha extension methods que recebem dados customizados.
 
 ## Opções do endpoint
-- **`Predicate`** filtra quais checks rodam (ex.: por `tags`); **`ResultStatusCodes`** mapeia status → HTTP; **`AllowCachingResponses`** (padrão `false` = o middleware define `Cache-Control`/`Expires`/`Pragma` para impedir cache); **`ResponseWriter`** customiza a saída (ex.: JSON).
+- **`Predicate`** filtra quais checks rodam (ex.: por `tags`); **`ResultStatusCodes`** mapeia status → HTTP (padrão: Healthy 200, Degraded 200, Unhealthy 503); **`AllowCachingResponses`** (padrão `false` = o middleware define `Cache-Control`/`Expires`/`Pragma` para impedir cache); **`ResponseWriter`** customiza a saída (ex.: JSON).
 - **`RequireHost("*:5001")`** restringe host/porta (útil em contêiner para expor porta de monitoramento); **`RequireAuthorization()`** protege o endpoint; CORS se consumido por navegador.
 - Não exponha detalhes internos (mensagens de exceção, strings de conexão) em endpoints públicos.
 
