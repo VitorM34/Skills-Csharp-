@@ -49,6 +49,8 @@ builder.Services
 - **Validação:** `ValidateDataAnnotations()`, `.Validate(delegate)`, `IValidateOptions<T>` (classe para validação complexa), e **source generator de validação em tempo de compilação** (`ValidateObjectMembers`, `ValidateEnumeratedItems`) para desempenho. Falha lança `OptionsValidationException` (`ex.Failures`). Por padrão a validação ocorre em runtime no acesso; use `ValidateOnStart` para falhar cedo.
 - Autores de biblioteca: ver "Options pattern guidance for library authors".
 
+**Nota de revisão (2026-11):** conferidos em texto: precedência dos provedores, `__`, `:` reservado, config somente leitura e sem `null`, regras de segredos, classe de options (não abstrata, ctor público sem parâmetros), um único ctor público parametrizado, setter privado e `IReadOnlyList` ignorados, lifetimes de `IOptions`/`Snapshot`/`Monitor`, `ValidateOnStart`, `IValidateOptions`, `OptionsValidationException.Failures`. **Não reconfirmados:** o aviso sobre `BuildServiceProvider` (não está na página de Options lida), "o binder source-generated não usa `TypeConverter`", "`IOptionsMonitor` só para providers baseados em arquivo" (**confirmado depois** na página .NET de Options: "only supported for file-system based configuration providers"; o snippet com `required`, `[Range]`, `ValidateDataAnnotations`/`ValidateOnStart` segue o exemplo da doc e compila em C# 11+), e os detalhes do source generator de validação (a página própria não foi lida). A página ASP.NET de configuração foi lida só nos ~40 mil primeiros caracteres.
+
 ## Checklist de revisão
 | # | Verificar |
 |---|---|
