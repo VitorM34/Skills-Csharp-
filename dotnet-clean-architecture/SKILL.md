@@ -42,6 +42,8 @@ Separation of concerns, encapsulation, dependency inversion, explicit dependenci
 ## Quando não complicar
 Um projeto único "all-in-one" (pastas Models/Views/Controllers/Data/Services) é válido para apps pequenos; a doc avisa que cresce em "spaghetti" quando não há indicação de quem depende de quem. Evoluir para multi-projeto quando a complexidade pedir.
 
+**Nota de revisão (2026-11, C#):** confirmados em common-web-application-architectures: sinônimos (Hexagonal/Ports-and-Adapters/Onion/Clean), Core sem dependência de outras camadas, UI e Infrastructure dependem do Core, listas de tipos por projeto, regra "sem `new`/estático para Infrastructure na UI", composition root e a exceção da referência UI→Infrastructure. O snippet é esqueleto (`EfTodoRepository` com corpo omitido não implementa a interface; `cs` não declarado); a sintaxe de primary constructor exige C# 12. Não verificada a assinatura exata de `UseSqlServer` (pacote EF Core).
+
 ## Checklist de revisão
 | # | Verificar |
 |---|---|
