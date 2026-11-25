@@ -7,6 +7,8 @@ description: Implementar e revisar injeção de dependência em .NET/ASP.NET Cor
 
 Só afirmar o que a doc oficial diz (fontes no fim); caso contrário, buscar antes.
 
+Nota de revisão (2026-11, C#): conferidos contra overview, guidelines e service-lifetimes: regras de construtor, ILogger<T> genérico aberto, lifetimes e descarte, anti-patterns, `IServiceScopeFactory` em hosted service, keyed services e `KeyedService.AnyKey` (`GetKeyedService` singular lança `InvalidOperationException` a partir do .NET 10). Snippet `Worker(IMessageWriter)` espelha a doc (o `/* ... */` precisa de `ExecuteAsync` para compilar).
+
 ## Conceito
 DI = Inversão de Controle entre classes e dependências, embutida no .NET (junto com configuration, logging, options). Dependência concreta criada com `new` dentro da classe é problema: trocar implementação exige alterar a classe, configurar dependências ficam espalhadas, e dificulta teste (não dá para mockar).
 
@@ -46,10 +48,10 @@ Resolver: ✔ singleton a partir de scoped/transient; ✔ scoped a partir de sco
 - Use singleton só para serviços com estado próprio caro ou globalmente compartilhado; sem estado → evite singleton. Singleton exige **thread safety**; o container é thread-safe ao resolver, mas isso não torna thread-safe as instâncias.
 
 ## Armadilhas (anti-patterns da doc)
-1. **Captive dependency**: singleton que recebe scoped no construtor (ex.: `Foo(Bar)` com `Foo` singleton e `Bar` scoped) → o scoped vive como singleton. Detectar com **scope validation**: a doc diz que por padrão, em Development (host criado com `CreateApplicationBuilder`), resolver serviço de um de lifetime maior falha; a página de lifetimes lida não cita o nome da opção `validateScopes` (use a doc da API `ServiceProviderOptions` para fora do host padrão).
+1. **Captive dependency**: singleton que recebe scoped no construtor (ex.: `Foo(Bar)` com `Foo` singleton e `Bar` scoped) → o scoped vive como singleton. Detectar com **scope validation**: a doc diz que por padrão, em Development (host criado com `CreateApplicationBuilder`), resolver serviço de um de lifetime maior falha; a página de guidelines cita a opção: `BuildServiceProvider(services, validateScopes: true)` (exceção `InvalidOperationException` "Cannot consume scoped service 'Bar' from singleton 'Foo'"); para outros cenários use a doc da API `ServiceProviderOptions`.
 2. **Scoped resolvido fora de escopo** vira singleton na prática.
 3. **Service locator** (`GetService` onde DI serve; injetar factory que resolve em runtime): evitar.
-4. **`BuildServiceProvider` durante o registro**: evitar; use overloads que recebem `IServiceProvider` (não confirmei esta frase nas páginas de DI lidas agora: a doc de scope validation diz que `BuildServiceProvider` é onde a validação de escopos acontece; ⚠ trate como CONVENÇÃO até reconferir).
+4. **`BuildServiceProvider` durante o registro**: evitar; use overloads que recebem `IServiceProvider` (confirmado na página de guidelines: "Avoid calls to BuildServiceProvider when configuring services ... use an overload that includes the IServiceProvider"). A doc de scope validation diz que a validação de escopos acontece em `BuildServiceProvider`.
 5. **Factory async com `.Result`** → deadlock. DI não suporta resolução async; chame métodos async depois de resolver.
 6. **Guardar `IApplicationBuilder.ApplicationServices` em estático**; acesso estático a services.
 7. **Colocar dados/configuração no container** (ex.: carrinho do usuário). Configuração → options pattern.
@@ -59,7 +61,7 @@ Resolver: ✔ singleton a partir de scoped/transient; ✔ scoped a partir de sco
 `AddKeyedSingleton<IMessageWriter, QueueMessageWriter>("queue")` e consumo com `[FromKeyedServices("queue")]`. Chave pode ser qualquer `object` com `Equals` correto. Desde .NET 10, `GetKeyedService` (singular) com `KeyedService.AnyKey` lança `InvalidOperationException`.
 
 ## Container padrão vs terceiros
-Use o embutido, a menos que precise de recursos que ele não tem. A lista (property injection, injeção por nome, child containers, lifetime customizado, `Func<T>` lazy, registro por convenção) vem da seção "Default service container replacement", que **não consegui reler** nesta revisão (a página de ASP.NET só aponta para ela): confira na doc antes de citar.
+Use o embutido, a menos que precise de recursos que ele não tem. A lista da seção "Default service container replacement" (página de guidelines) é: property injection, child containers, lifetime customizado, `Func<T>` para lazy, registro por convenção. "Injeção por nome" não consta dessa lista (hoje há keyed services embutidos): remova esse item ao citar.
 
 ## Checklist de revisão
 | # | Verificar |
