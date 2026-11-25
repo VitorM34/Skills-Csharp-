@@ -27,7 +27,7 @@ Benefícios: ponto central para **nomear e configurar** clientes lógicos; pool/
 - Em console: `IHttpClientFactory` via Generic Host. `header propagation middleware` para repassar headers.
 
 ## Resiliência (doc `Microsoft.Extensions.Http.Resilience`)
-- Pacote **`Microsoft.Extensions.Http.Polly` está obsoleto**: use `Microsoft.Extensions.Http.Resilience` (e `Microsoft.Extensions.Resilience` para pipelines genéricos).
+- Pacote **`Microsoft.Extensions.Http.Polly` está descontinuado (deprecated)**: use `Microsoft.Extensions.Http.Resilience` (e `Microsoft.Extensions.Resilience` para pipelines genéricos).
 - **Adicione apenas um handler de resiliência por cliente; não empilhe** (para vários, use `AddResilienceHandler` customizado).
 ```csharp
 services.AddHttpClient<MyClient>().AddStandardResilienceHandler();
@@ -37,6 +37,8 @@ services.AddHttpClient<MyClient>().AddStandardResilienceHandler();
 - **Hedging** (`AddStandardHedgingHandler`): executa contra vários endpoints se lento/falha transitória; pool de circuit breakers por **autoridade da URL** (esquema+host+porta); configure `SelectPipelineByAuthority`/`SelectPipelineBy`.
 - **Pipelines genéricos:** `AddResiliencePipeline("chave", builder => ...)` e `ResiliencePipelineProvider<string>`; `AddResilienceEnricher` para métricas.
 - Problemas conhecidos: gRPC client factory < 2.64.0 incompatível com `AddStandardResilienceHandler`; Application Insights < 2.23.0.
+
+**Nota de revisão (2026-11, C#):** confirmados nas páginas httpclient-guidelines, httpclient-factory (.NET), http-requests (ASP.NET Core), http-resilience e resilience (intro): pool de conexões/Dispose, DNS sem TTL e `PooledConnectionLifetime`, handler lifetime padrão de 2 min, typed client transient e aviso para singleton, `DelegatingHandler` transient (`InvalidOperationException` se singleton), defaults das 5 estratégias, status/exceções tratados, `DisableFor`/`DisableForUnsafeHttpMethods` (POST, PATCH, PUT, DELETE, CONNECT), hedging por autoridade, `AddResiliencePipeline`/`ResiliencePipelineProvider<string>`/`AddResilienceEnricher`, problemas conhecidos gRPC (<= 2.63.0) e App Insights (<= 2.22.0). Ajuste de redação: a doc diz que o pacote `Microsoft.Extensions.Http.Polly` está "deprecated" (descontinuado). Limite: a página http-requests foi lida só até ~100 mil dos ~147 mil caracteres.
 
 ## Checklist de revisão
 | # | Verificar | Gravidade |
