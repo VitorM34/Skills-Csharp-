@@ -74,6 +74,8 @@ Depois **remova a configuração do logger padrão**, inclusive a seção `"Logg
 - **Testes:** capture eventos com um sink em memória no teste (a doc não foi lida para isso — escolha um sink de teste da comunidade e verifique).
 - **Alta cardinalidade/volume:** avalie custo de armazenamento do sink; amostragem/filtros por nível (`MinimumLevel.Override`).
 
+> Nota de revisão (2026-11, C#): Serilog é de terceiros, fora do escopo das docs da Microsoft; nesta passada só se checou que os snippets C# são sintaticamente coerentes (`AddSerilog()` / `AddSerilog((services, lc) => ...)`, `LogContext.PushProperty`, `BeginScope` com dicionário, `Log.Error(ex, ...)`). Comportamentos do Serilog (limites do File sink, buffer do Async etc.) **não foram reconferidos** contra as fontes do projeto nesta revisão.
+
 ## Checklist de revisão
 | # | Verificar | Gravidade |
 |---|---|---|

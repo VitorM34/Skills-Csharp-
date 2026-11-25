@@ -22,7 +22,7 @@ Se houver ambiguidade que muda o desenho (provider, auth, síncrono × evento), 
 ### 1. Contrato primeiro
 - Endpoints, verbos e status codes (`aspnet-http-endpoints`): POST→**201** (tutorial de controllers: `CreatedAtAction` com header `Location`; tutorial Minimal API: `Results.Created(uri, ...)` — o header `Location` ali não foi confirmado em texto), PUT/DELETE→**204 No Content** (confirmado nos dois tutoriais; PATCH no tutorial Minimal API não foi relido), GET por id→200 ou **404** se não existir.
 - **DTOs de entrada/saída** (`dotnet-dto-review`): os tutoriais oficiais tratam over-posting numa seção "Prevent over-posting" posterior aos endpoints (o tutorial Minimal API já usa um `TodoPatchDto` na seção do PATCH); a frase de que apps de produção limitam entrada/saída a um subconjunto do modelo só foi lida em resumo, não em texto integral. Por isso **defina o DTO já aqui** (CONVENÇÃO), nunca exponha a entidade.
-- **Validação** (`aspnet-validation`; a skill diz que Minimal API exige `AddValidation()` — **não confirmado** nas páginas lidas nesta revisão; confirme em `aspnet-validation`), erros como `ProblemDetails` (`aspnet-error-handling`).
+- **Validação** (`aspnet-validation`; as *release notes* do ASP.NET Core 10 confirmam: validação embutida em Minimal APIs é habilitada com `builder.Services.AddValidation()`, desabilitável por endpoint com `.DisableValidation()`, e usa um source generator que só descobre tipos no assembly onde `AddValidation` é chamado; a página *parameter binding* não trata disso), erros como `ProblemDetails` (`aspnet-error-handling`).
 ### 2. Modelo de domínio
 `dotnet-model-review` (+ `csharp-nullable-references`, `csharp-modern-features`, `csharp-types-oop`). Se for DDD: `dotnet-ddd-tactical`.
 ### 3. Persistência
@@ -52,6 +52,8 @@ Configuração/Options (`aspnet-configuration-options`), logging estruturado sem
 4. **`dotnet-security-review`** aplicado ao que foi criado (injection, autorização, segredos, upload, desserialização).
 5. **`dotnet-review-all`** no diff (mapeia sinais → skills e consolida achados).
 6. NuGet Audit sem NU1901–NU1904 novos.
+
+> Nota de revisão (2026-11, C#): esta skill quase não faz afirmações de linguagem/API; conferido `AddValidation()` (release notes do ASP.NET Core 10). Não reconferidos nesta passada: `Results.Created` e `Location`, `CreatedAtAction`, 204 em PUT/DELETE, `dotnet format --verify-no-changes`, NU1901–NU1904 (lidos em revisão anterior ou fora do escopo desta passada).
 
 ## Entregável da skill
 Responda com: (a) decisões tomadas e as que **assumiu** (liste), (b) arquivos criados/alterados, (c) como rodar/testar (`dotnet` comandos), (d) resultado dos gates (o que passou/falhou/não foi executado), (e) pendências. **Não diga "feito" sem ter rodado build e testes**; se não puder executar, diga que não verificou.

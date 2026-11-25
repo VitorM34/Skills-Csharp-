@@ -118,6 +118,8 @@ await channel.BasicConsumeAsync("orders", autoAck: false, consumer: consumer);
 | 13 | Handler longo que estoura o timeout de ack (30 min padrão); shutdown sem drenar mensagens em andamento | Média |
 | 14 | Uso do exemplo antigo (`IModel`, `EventingBasicConsumer`, API síncrona) com cliente 7.x | Média |
 
+**Nota de revisão (2026-11, C#):** snippets conferidos contra o código-fonte do cliente (`main`): `IChannel : IAsyncDisposable, IDisposable` (logo `await using var channel` compila), `CreateChannelOptions(bool, bool, RateLimiter, ushort?)` com `ThrottlingRateLimiter`, `BasicQosAsync(uint, ushort, bool, …)`, `BasicAckAsync`/`BasicNackAsync` retornam `ValueTask`. `PermanentFailureException` e `ProcessAsync` são placeholders. Não conferido: o `main` pode diferir da 7.x publicada.
+
 ## Fontes [RMQ] (documentação oficial do RabbitMQ)
 - .NET/C# Client API Guide: https://www.rabbitmq.com/client-libraries/dotnet-api-guide
 - Cliente .NET (visão geral): https://www.rabbitmq.com/client-libraries/dotnet

@@ -40,8 +40,8 @@ static async Task<IResult> GetTodo(int id, TodoDb db) =>
 3. **Retorno:** `IResult` (framework chama `ExecuteAsync`); `string` → `text/plain`; qualquer outro tipo `T` → JSON.
 4. **Prefira `TypedResults` a `Results`**: testabilidade (`Assert.IsType<Ok<Todo[]>>(result)`) e metadados de resposta para OpenAPI automáticos. Para vários retornos possíveis use `Results<TResult1, TResultN>` em vez de `IResult` (mantém metadata e dá checagem em compilação).
 5. **Helpers:** `Ok`, `Created`, `NoContent`, `NotFound`, `BadRequest`, `Problem`, `ValidationProblem`, `StatusCode`, `Text`, `Redirect`, `File`. Cabeçalhos via `HttpContext.Response.Headers`.
-6. **Binding:** ver `aspnet-http-endpoints`. `[AsParameters]` agrupa parâmetros num tipo (binding simples, não recursivo). Binding customizado: `TryParse`, `BindAsync`, `IBindableFromHttpContext`.
-7. **Validação:** baseada em `System.ComponentModel.DataAnnotations`, aplicada a parâmetros de classe/record (query, header, corpo) **somente se você chamou `builder.Services.AddValidation()`** (sem isso, nada é validado). Falha → `400` com detalhes. Desligar por endpoint: `.DisableValidation()`. Personalizar com `IProblemDetailsService`. Detalhes completos na skill `aspnet-validation`.
+6. **Binding:** ver `aspnet-http-endpoints`. `[AsParameters]` agrupa parâmetros num tipo (binding simples, não recursivo — **não reconferido**: a parte da página que o descreve não foi lida em texto). Binding customizado: `TryParse`, `BindAsync`, `IBindableFromHttpContext`.
+7. **Validação:** baseada em `System.ComponentModel.DataAnnotations`, aplicada a parâmetros de classe/record (query, header, corpo) **somente se você chamou `builder.Services.AddValidation()`** (sem isso, nada é validado). Falha → `400` com detalhes. Desligar por endpoint: `.DisableValidation()` (**confirmado** na página *Minimal APIs*, seção "Disable validation for specific endpoints"; a página *Validation* não o menciona). Personalizar com `IProblemDetailsService` (a página *Minimal APIs* tem a seção "Customize validation error responses using `IProblemDetailsService`"; **nenhuma das duas páginas diz em que versão isso foi introduzido**, e `IProblemDetailsService` em si já existia antes do .NET 10). Detalhes completos na skill `aspnet-validation`.
 
 ```csharp
 public record Product([Required] string Name, [Range(1, 1000)] int Quantity);
@@ -59,6 +59,10 @@ public record Product([Required] string Name, [Range(1, 1000)] int Quantity);
 
 ## Quando preferir controllers (doc de erros)
 Validação de modelo complexa, tratamento de exceção centralizado em vários controllers, controle fino do formato de erro e integração com filtros/convenções do MVC.
+
+**Nota de revisão (2026-11):** conferidos em texto: `MapGroup` (prefixo, aninhamento, convenções valem como em cada endpoint), regras de retorno (`string` text/plain, `T` JSON, `IResult`), vantagens de `TypedResults` e `Results<,>` (erro de compilação para tipo não declarado), `WithName` (sensível a maiúsculas, único, vira operationId), `Produces<T>` só adiciona metadata, endpoint filters (FIFO antes de `next`, FILO depois, `GetArgument` por índice, filtro não é resolvido pela DI mas pode receber serviços, `AddEndpointFilterFactory`, `MapControllers().AddEndpointFilter`), `[FromKeyedServices]`, `MapMethods`. A página principal de Minimal APIs (315 mil caracteres) foi lida só nos primeiros ~40 mil.
+
+**Nota de revisão (2026-11, C#):** snippets conferidos contra as páginas de filtros/validação/binding: `AddEndpointFilter`, `GetArgument<T>(0)`, `IEndpointFilter.InvokeAsync` (retorna `ValueTask<object?>`), `AddEndpointFilterFactory` e `AddValidation()` batem com a doc; o ternário `TypedResults.Ok(...) : TypedResults.NotFound()` em método `Task<IResult>` compila por tipagem alvo (C# 9+). O snippet da estrutura é parcial (`GetAllTodos`, `TodoDb`, `TodoItemDTO` etc. não são mostrados). Na .NET 10, a doc de validação registra limitação: tipos de valor nullable como parâmetro de Minimal API não são validados (issue dotnet/aspnetcore#67033).
 
 ## Checklist de revisão
 | # | Verificar |

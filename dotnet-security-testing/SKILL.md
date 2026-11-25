@@ -122,6 +122,8 @@ Outros bons candidatos: JWT expirado/`iss`/`aud` errados → 401; erro interno n
 | 9 | Teste de DoS/carga destrutiva fora do seu ambiente (proibido pelas regras da Microsoft quando contra ativos dela) | Alta |
 | 10 | Relatório/segredos coletados sem proteção | Média |
 
+Nota de revisão (2026-11, C#): os três snippets do Passo 5 foram verificados só por leitura: sintaxe C# válida (`is ... or ...` exige C# 9+; `PostAsJsonAsync`/`GetFromJsonAsync` exigem `System.Net.Http.Json`; `clientUserA`, `clientUserB`, `anonymousClient`, `CreateOrderAs`, `ProfileDto` são placeholders não definidos, e `r` fica sem uso, só aviso). Nenhuma afirmação de C#/BCL foi contradita; não houve consulta à doc OWASP/ZAP/MSRC nem às páginas Microsoft de segurança nesta revisão (conteúdo externo ou de outras skills, não conferido aqui).
+
 ## Fontes
 **[EXT] OWASP Web Security Testing Guide (WSTG):** https://owasp.org/www-project-web-security-testing-guide/
 **[EXT] OWASP ASVS 5.0:** https://owasp.org/www-project-application-security-verification-standard/ · requisitos: https://github.com/OWASP/ASVS

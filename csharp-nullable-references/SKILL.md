@@ -23,7 +23,7 @@ Migração gradual: ver *nullable migration strategies*.
 1. Todo reference type é **não-nulo por padrão**; `?` declara que pode ser nulo.
 2. Variável não-nula: aviso se receber valor possivelmente nulo. Variável nullable: aviso se for **desreferenciada** sem checar.
 3. A análise se atualiza por **atribuição** e por **checagens** (`is null`, `is not null`, `is { }`, `if`, loops, retorno antecipado). Ela **não entra no corpo de outros métodos**: use atributos para comunicar contrato.
-4. Tipo de modelagem: obrigatório = não-nulo (`FirstName`), opcional = nullable (`MiddleName`). Construtor deixando membro não-nulo sem inicializar gera aviso. Alternativas: parâmetro de construtor primário, ou `required` (ver `dotnet-dto-review`).
+4. Tipo de modelagem: obrigatório = não-nulo (`FirstName`), opcional = nullable (`MiddleName`). Construtor deixando membro não-nulo sem inicializar gera aviso. Alternativas na doc: membros `required`, construtor parametrizado que o chamador deve invocar, ou collection expressions (construtor primário só aparece como exemplo, não como recomendação; ver `dotnet-dto-review`).
 5. **Operador `!`** (null-forgiving): afirma not-null ignorando a análise. Use com parcimônia: cada uso é um ponto sem proteção. Prefira checagem de null, reestruturar ou anotar a API.
 6. **Atributos** (`System.Diagnostics.CodeAnalysis`): ex. `[NotNullWhen(true)] string? value` para métodos tipo `IsPresent(value)` que, ao retornar `true`, garantem not-null. Todas as APIs do .NET são anotadas desde o .NET 5.
 

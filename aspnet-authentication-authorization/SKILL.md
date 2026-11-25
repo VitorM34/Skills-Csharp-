@@ -15,7 +15,7 @@ Só afirmar o que a doc oficial diz (fontes no fim). Ordem dos middlewares: `asp
 - Só um scheme registrado = é o padrão. Vários sem padrão → `InvalidOperationException: No authenticationScheme was specified...`: defina com `AddAuthentication("scheme")`/`AddAuthentication(o => ...)` ou indique `[Authorize(AuthenticationSchemes = "...")]`.
 - **Challenge** é invocado pela autorização quando um usuário não autenticado acessa recurso protegido; **Forbid** quando autenticado mas sem permissão.
 - Multi-tenant: não há solução nativa (a doc cita Orchard Core, ABP, Finbuckle.MultiTenant).
-- **Fluxos seguros:** use a opção mais segura (Azure: **managed identities**); **evite o grant ROPG** (Resource Owner Password Credentials); segredos fora do código/arquivos (`aspnet-configuration-options`).
+- **Fluxos seguros:** use a opção mais segura (Azure: **managed identities** — a página do JWT cita managed identity para segurança app-a-app); **evite o grant ROPG** (Resource Owner Password Credentials) — esta frase e a de segredos vêm da página *Security overview*, que **não foi relida** nesta revisão (a página de autenticação lida não as contém); segredos fora do código/arquivos (`aspnet-configuration-options`).
 - **Escolha de solução:** **ASP.NET Core Identity** (APIs, UI e banco para usuários/credenciais/permissões; logins externos, MFA, senha, lockout, authenticator apps) basta na maioria dos casos. Um **servidor OIDC** é necessário quando há APIs consumidas por outros apps/SSO (tokens assinados com criptografia assimétrica). Cookies = padrão do ASP.NET Core para web apps (limitados ao domínio); tokens (JWT) não ficam presos a um domínio.
 
 ## Cookies e APIs (.NET 10)
@@ -49,6 +49,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 - **Requirements/handlers:** requirement (`IAuthorizationRequirement`) + handler (`AuthorizationHandler<TRequirement>` ou `IAuthorizationHandler`). Handler chama `context.Succeed(requirement)`; **não chamar Succeed não é falha** (outros handlers podem passar); `context.Fail()` **garante falha**. Todos os handlers são chamados mesmo após Succeed/Fail (efeitos como log). Registre handlers no DI (qualquer lifetime, ex.: `AddSingleton<IAuthorizationHandler, MinimumAgeHandler>()`). `IAuthorizationPolicyProvider` gera políticas dinamicamente.
 - **Resource-based (imperativa):** atributos avaliam **antes** do model binding e de carregar o recurso, então `[Authorize]` **não basta** para "só o autor edita o documento". Carregue o recurso e chame `IAuthorizationService.AuthorizeAsync(user, resource, "PolicyName")`; use `authorizationResult.Succeeded`.
 - Blazor: `[Authorize]` só em componentes `@page` roteados; para partes da página use `AuthorizeView`.
+
+**Nota de revisão (2026-11):** conferidos em texto: schemes/handlers/`RemoteAuthenticationHandler`, a mensagem `No authenticationScheme was specified`, challenge (302 no cookie, 401 `www-authenticate: bearer` no JWT) e forbid (403), multi-tenant (Orchard Core, ABP; Finbuckle só nas versões 7.0+), a tabela de policies, roles (OR numa lista, AND em vários atributos; nomes sensíveis a maiúsculas), claims, resource-based, semântica de `Succeed`/`Fail` e `InvokeHandlersAfterFailure` (padrão true), static files fora da fallback, cookies 401/403 no .NET 10 (metadata, `DisableCookieRedirect`/`AllowCookieRedirect`, chave global `IgnoreRedirectMetadata`) e as regras de JWT. `MapInboundClaims` é só citado como opção (o significado está em outra página).
 
 ## Checklist de revisão
 | # | Verificar | Gravidade |

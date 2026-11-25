@@ -28,9 +28,9 @@ dotnet sln add src/MeuApp.Api tests/MeuApp.Tests          # (o dotnet sln encont
 dotnet add tests/MeuApp.Tests reference src/MeuApp.Api
 ```
 - **Templates padrão** (SDK): `webapi`, `webapiaot`, `apicontroller`, `web` (vazio), `mvc`, `webapp` (Razor Pages), `grpc`, `blazor`, `blazorwasm`, `classlib`, `console`, `worker`, `razorclasslib`, `xunit`, `mstest`, `nunit`, e de configuração: `buildprops`, `buildtargets`, `editorconfig`, `globaljson`, `gitignore`, `nugetconfig`, `tool-manifest`, `sln`. Liste os da sua máquina com `dotnet new list`.
-- `dotnet new packagesprops` (Central Package Management) é citado pela doc do **NuGet**, mas **não aparece na tabela de templates padrão do SDK** que li: confirme com `dotnet new list`; se faltar, crie o `Directory.Packages.props` à mão (`dotnet-project-tooling`).
+- `dotnet new packagesprops` (Central Package Management) é citado pela doc do **NuGet** (*Central Package Management*, que mostra `dotnet new packagesprops`), mas **não aparece na tabela de templates padrão do SDK** (nem `slnx`/`slnf`, só `sln`): confirme com `dotnet new list`; se faltar, crie o `Directory.Packages.props` à mão (`dotnet-project-tooling`).
 - **`global.json`:** `version` precisa ser **completo** (sem curingas); com *package lock files* use `rollForward: disable` (`dotnet-ci-cd`).
-- **Solution `.slnx`:** a partir do .NET 10 é o padrão de `dotnet new sln`; `dotnet sln migrate` converte um `.sln` existente para `.slnx`; filtros de solução `.slnf` (`dotnet new slnf` a partir do .NET 11). Confira a compatibilidade da sua IDE/CI antes de migrar.
+- **Solution `.slnx`:** a partir do .NET 10 é o padrão de `dotnet new sln`; `dotnet sln migrate` converte um `.sln` existente para `.slnx`; filtros de solução `.slnf` (`dotnet new slnf` a partir do .NET 11, segundo a página do `dotnet sln`). Confira a compatibilidade da sua IDE/CI antes de migrar.
 - **Convenção do tutorial oficial de testes [MS]:** biblioteca `PrimeService` + projeto de teste `PrimeService.Tests`, criados com `dotnet new sln`, `dotnet sln add`, `dotnet new xunit`. **Mantenha testes unitários em projeto separado dos de integração** (a doc de boas práticas diz que isso evita dependências de infraestrutura nos unitários).
 
 ## Layout (CONVENÇÃO)
@@ -83,6 +83,8 @@ repo/
 ## Skills e quando usar
 - Nova funcionalidade → `dotnet-feature-workflow`; revisão → `dotnet-review-all`; segurança → `dotnet-security-review`.
 ```
+
+> Nota de revisão (2026-11, C#): confirmados na doc: opções `--sdk-version`/`--roll-forward`/`--test-runner` (SDK 10) do `globaljson`, `buildprops --inherit/--use-artifacts`, `editorconfig --empty`, `sln --format` (SDK 9.0.200+; `.slnx` padrão no .NET 10), `dotnet sln migrate`, layout *artifacts output* (.NET 8+), `global.json` (versão completa, `rollForward`, `disable` com package lock files). Não confirmado: o conselho de pôr `artifacts/` no `.gitignore` já é CONVENÇÃO; `Nullable`/`ImplicitUsings` ligados nos templates não foram reconferidos nas páginas de templates; a parte [CC] (Claude Code) está fora do escopo C#/.NET desta revisão.
 
 ## Checklist de revisão
 | # | Verificar | Gravidade |

@@ -23,7 +23,7 @@ Só afirmar o que a doc oficial diz (fontes no fim). Aviso da própria doc: **o 
 Grupo de entidades e value objects tratado como **unidade de consistência transacional**: invariantes e regras do grupo são garantidos por **um único ponto de entrada, a aggregate root** (acesso de fora só pela root; consistência no fim de cada ação de negócio). Ex.: `OrderAggregate` = `Order` (root) + `OrderItem` (entidade filha) + `Address` (value object) + `OrderStatus` + `IOrderRepository`. **Referencie outros aggregates por identidade** (id), mantendo-os pequenos; consistência **entre aggregates** via **domain events** (ver abaixo).
 
 ## Value objects
-- **Sem identidade**; igualdade pelos **atributos** (classe base com `Equals` por todos os valores); **imutáveis** (valores fornecidos na construção e não mudam). O exemplo de value object da doc (`Address`) usa `{ get; private set; }`. A observação sobre `private set` por causa de serialização vem da página de **domain events** (eventos tratados via fila precisam de `private set` em vez de somente leitura para o desserializador), não da de value objects.
+- **Sem identidade**; igualdade pelos **atributos** (classe base com `Equals` por todos os valores); **imutáveis** (valores fornecidos na construção e não mudam). O exemplo de value object da doc (`Address`) usa `{ get; private set; }`. A própria página de **value objects** justifica: value objects costumam ser serializados/desserializados para passar por filas de mensagens, e propriedades somente-get impediriam o desserializador de atribuir valores, então se deixa `private set` ("read-only o bastante para ser prático"). (Correção da revisão 2026-11: a versão anterior desta skill atribuía essa observação apenas à página de domain events; não reconferida lá.)
 - **Persistência com EF Core:** como **owned entity types** (EF Core 2.0+) na doc do e-book; **atualização atual (EF 8+): prefira complex types** (ver `efcore-advanced-mapping`).
 - **Enumeration classes** (classe em vez de `enum`) quando o enum precisa de comportamento (doc "Enumeration classes over enum types").
 
@@ -54,6 +54,8 @@ Separar **commands** (mudam estado, via domínio) de **queries** (idempotentes, 
 | 8 | Integration event publicado antes do commit |
 | 9 | DDD aplicado a CRUD simples (custo sem benefício) |
 | 10 | Fronteiras de bounded context com comunicação excessiva entre eles |
+
+**Nota de revisão (2026-11, C#):** não há snippets C# nesta skill. Reconferida em https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/implement-value-objects: sem identidade, imutáveis, igualdade por atributos, `Address` com `private set`, owned entity types desde EF Core 2.0. NÃO reconferidos: a recomendação "complex types (EF 8+)" (vem de `efcore-advanced-mapping`, não desta doc, que é de 2022), e as demais páginas do e-book (domain events, validações, repositório, bounded contexts).
 
 ## Fontes oficiais
 - DDD-oriented microservice: https://learn.microsoft.com/en-us/dotnet/architecture/microservices/microservice-ddd-cqrs-patterns/ddd-oriented-microservice

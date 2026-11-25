@@ -69,6 +69,8 @@ public class TodoItemDTO     // DTO do tutorial oficial
 - Propriedades de coleção em DTO: inicialize (`= []`) e não retorne `null` (diretriz de coleções); ver `csharp-collections`.
 - Habilite `<Nullable>enable</Nullable>`; `string?` = opcional, `string` = obrigatório (ver `csharp-nullable-references`).
 
+**Nota de revisão (2026-11, C#):** confirmados nas páginas de `record`, `required` e Validation: record posicional = init-only e referência; imutabilidade rasa; propriedade calculada deve ser avaliada no acesso por causa de `with`; alvo `property:`; record não serve como entidade EF (igualdade por referência / sem update de tipos imutáveis); `required` (C# 11) aceita `null` com aviso e não se aplica a parâmetro posicional; `AddValidation()` necessário em Minimal APIs (sem ele nenhuma validação automática roda; a página diz que a API não vale para MVC/Razor Pages). NÃO conferidos: o 400 automático de `[ApiController]` e o `= []` em propriedades (C# 12, collection expressions), tutoriais min-web-api/first-web-api.
+
 ## Checklist de revisão
 | # | Verificar | Gravidade |
 |---|---|---|

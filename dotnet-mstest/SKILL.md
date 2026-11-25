@@ -30,7 +30,7 @@ public class CalculatorTests
 - Em código novo **use sempre a classe `Assert`**. `StringAssert` e `CollectionAssert` são mantidas por compatibilidade e **provavelmente serão descontinuadas** (espalhar assertions em 3 tipos prejudica a descoberta).
 - Principais: `AreEqual/AreNotEqual`, `AreSame/AreNotSame`, `IsTrue/IsFalse`, `IsNull/IsNotNull`, `IsInstanceOfType<T>`, `Contains/DoesNotContain`, `ContainsSingle`, `HasCount`, `IsEmpty/IsNotEmpty`, `StartsWith/EndsWith`, `MatchesRegex`, `IsGreaterThan/IsLessThan/IsInRange/IsPositive/IsNegative`, `Fail`, `Inconclusive`.
 - **Exceções (MSTest 3.8+):** `Assert.Throws<T>`, `Assert.ThrowsExactly<T>` (tipo exato), `ThrowsAsync`, `ThrowsExactlyAsync`.
-- **MSTest 4.0+:** todas as `Assert` capturam a expressão do argumento nas mensagens de falha; existe `Assert.That(expr)` (Boolean com `CallerArgumentExpression`).
+- **MSTest 4.0+:** todas as `Assert` capturam a expressão do argumento nas mensagens de falha; existe `Assert.That(expr)` (Boolean com `CallerArgumentExpression`). A própria página de assertions é inconsistente: o texto principal cita `Assert.That(order.Total > 0)` a partir da **4.0**, mas uma nota no fim cita `Assert.That(() => condição)` (expression tree) adicionado na **3.8**; confirme a assinatura/versão no pacote do projeto. `Assert.That` como *propriedade* é outro recurso (ponto de extensão para asserts customizados).
 - Parâmetro opcional `message` é exibido na falha.
 
 ## Data-driven
@@ -48,7 +48,7 @@ public class CalculatorTests
 2. **Classe:** `[ClassInitialize]`/`[ClassCleanup]` (herança via `InheritanceBehavior.BeforeEachDerivedClass`).
 3. **Global por teste** (3.10+): `[GlobalTestInitialize]`/`[GlobalTestCleanup]` (ordem entre múltiplos não é garantida).
 4. **Por teste:** `[TestInitialize]`/`[TestCleanup]` (por linha de dados em testes parametrizados).
-Regras dos de assembly/classe: **`public static`**, retorno `void`/`Task`/`ValueTask`, `Initialize` exige um parâmetro `TestContext`, `Cleanup` aceita zero ou um (3.8+), um de cada por assembly/classe, dentro de classe `[TestClass]`. Falha em cleanup é reportada como resultado separado (4.2+). Test classes podem receber `TestContext` pelo **construtor** (a doc lida só cita um parâmetro `TestContext` exato em construtor público, sem versão: o "3.6+" e o "preferido à propriedade" desta skill não foram confirmados). MSTest 4.5 (experimental): `MSTest.Extensions.Hosting` cria classes de teste com serviços do `Microsoft.Extensions.Hosting`.
+Regras dos de assembly/classe: **`public static`**, retorno `void`/`Task`/`ValueTask`, `Initialize` exige um parâmetro `TestContext`, `Cleanup` aceita zero ou um (3.8+), um de cada por assembly/classe, dentro de classe `[TestClass]`. Falha em cleanup é reportada como resultado separado (4.2+). Test classes podem receber `TestContext` pelo **construtor** (página TestContext: "starting with v3.6", recomendado em vez da propriedade porque dá acesso no construtor e permite campo `readonly` não nulo; reconferido em 2026-11). Observação: a página TestContext diz que `TestContext` em `AssemblyCleanup`/`ClassCleanup` vale "starting with 3.6", enquanto a página de lifecycle diz 3.8+; ao divergir, confirme no pacote. MSTest 4.5 (experimental): `MSTest.Extensions.Hosting` cria classes de teste com serviços do `Microsoft.Extensions.Hosting`.
 
 ## Execução e controle
 - Execução é **sequencial por padrão**. Paralelismo: `[assembly: Parallelize(Workers = 0, Scope = ExecutionScope.MethodLevel|ClassLevel)]` (Workers 0 = nº de processadores lógicos); `[DoNotParallelize]` em classe/método; também via `.runsettings`, `testconfig.json` (`mstest.parallelism.enabled`) e MSBuild (`MSTestParallelizeScope`). A doc recomenda habilitar no assembly por padrão para que testes novos nasçam compatíveis com paralelismo (analyzer MSTEST0001).
@@ -64,7 +64,7 @@ Propriedades úteis: `TestName`, `CurrentTestOutcome`, `FullyQualifiedTestClassN
 
 ## Projeto, SDK e runner
 - **MSTest tem runner próprio (desde 3.2.0)**, mais leve/rápido que VSTest e o recomendado; baseado em MTP. (A página do MSTest.Sdk lida não traz essa versão nem a lista de plataformas suportadas abaixo: vêm das páginas *overview*/*running tests*, não relidas agora.)
-- **`MSTest.Sdk`** substitui `Microsoft.NET.Sdk` e **liga o runner MTP por padrão** (`EnableMSTestRunner` e `TestingPlatformDotnetTestSupport` = true). Volte ao VSTest com `<UseVSTest>true</UseVSTest>`. Não funciona onde se precisa de outro SDK base (ex.: `Microsoft.NET.Sdk.Web` em testes de integração): configure manualmente (`EnableMSTestRunner`, `OutputType=Exe`, pacote `MSTest`).
+- **`MSTest.Sdk`** substitui `Microsoft.NET.Sdk` e **liga o runner MTP por padrão** (`EnableMSTestRunner` e `TestingPlatformDotnetTestSupport` = true). Volte ao VSTest com `<UseVSTest>true</UseVSTest>`. Não funciona onde se precisa de outro SDK base (ex.: `Microsoft.NET.Sdk.Web` em testes de integração): configure manualmente (`EnableMSTestRunner`, `OutputType=Exe`, pacote `MSTest`) (não confirmado: a página do MSTest.Sdk lida em 2026-11 não menciona essa limitação nem o SDK Web; confirme na doc).
 - Meta-pacote `MSTest` = `Microsoft.NET.Test.Sdk` + `MSTest.TestAdapter` + `MSTest.TestFramework` + `MSTest.Analyzers` (+ TrxReport e CodeCoverage a partir da 3.8).
 - Perfis de extensões MTP no SDK (`TestingExtensionsProfile`): `None`, `Default` (perfil usado se a propriedade não for definida; Code Coverage, TRX e, a partir do MSTest.Sdk **4.3.0**, Azure DevOps e GitHub Actions), `AllMicrosoft` (+ Crash/Hang dump, Fakes, Hot Reload, HTML, Retry; licença restritiva em algumas).
 - Defina `EnableMSTestRunner`/`TestingPlatformDotnetTestSupport` no `Directory.Build.props` para toda a solution.
@@ -84,6 +84,8 @@ Propriedades úteis: `TestName`, `CurrentTestOutcome`, `FullyQualifiedTestClassN
 | 8 | Categorias (`Unit`/`Integration`) para filtrar no CI |
 | 9 | Runner/SDK coerente (MTP vs VSTest) com `dotnet test` e CI; analyzers ativos |
 | 10 | Versão do MSTest compatível com os atributos usados |
+
+Nota de revisão (2026-11, C#): reconferidos nas páginas oficiais (data-driven, assertions, lifecycle, controlling-execution, TestContext, MSTest.Sdk, lidas por inteiro): `CombinatorialData` 4.4+, `DynamicData` campo 3.11+, `DataRow.IgnoreMessage`/métodos genéricos/`TestDataRow` 3.8, `DateOnly/TimeOnly` 3.10, `DataSource` só .NET Framework, `Assert.Throws*` 3.8+, comparações/strings 3.10+, `ValueTask` 3.3+, `GlobalTest*` 3.10, falha de cleanup 4.2+, `MSTest.Extensions.Hosting` 4.5 experimental, `Parallelize`/`DoNotParallelize`/`ResourceLock`, `Retry`, `OSCondition` 3.8, `CICondition` 3.10, `STATest*` 3.6 (`UseSTASynchronizationContext` 4.1), perfis `TestingExtensionsProfile` (Azure DevOps/GitHub Actions 4.3.0+), `TestRunCount` 3.9, `TestTempDirectory`. Snippet inicial compila. Não reconferidos: páginas overview/running-tests/organizing/order-unit-tests (MSTest 3.2.0 runner, plataformas, `Priority`/`Owner`, `OrderTestsByNameInClass` 3.6+, meta-pacote `MSTest`).
 
 ## Fontes oficiais
 - MSTest overview: https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-mstest-intro

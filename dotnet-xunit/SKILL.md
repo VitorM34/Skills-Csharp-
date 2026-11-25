@@ -55,6 +55,8 @@ A doc de shared context diz também que **fixtures não podem depender de outras
 | 7 | Nomes Método_Cenário_Resultado; AAA |
 | 8 | Versão do xUnit (v2/v3) considerada nas APIs usadas |
 
+Nota de revisão (2026-11, C#): conferido na doc da Microsoft (tutorial xUnit, lido por inteiro): pacotes do template (`Microsoft.NET.Test.Sdk`, `xunit`, `xunit.runner.visualstudio`, `coverlet.collector`), `[Fact]`, `[Theory]`/`[InlineData]`, `Assert.False(result, mensagem)`; o snippet compila (esqueleto). Não reconferido nesta revisão: afirmações vindas de xunit.net (shared context/paralelismo; marcadas como já conferidas acima) e suporte MTP/v3.
+
 ## Fontes oficiais
 - Tutorial xUnit com `dotnet test`: https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-csharp-with-xunit
 - Testing in .NET (visão geral de frameworks): https://learn.microsoft.com/en-us/dotnet/core/testing/

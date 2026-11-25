@@ -36,6 +36,8 @@ Só afirmar o que a doc oficial diz (fontes no fim). Visão geral e quando adota
 - **Strangler Fig**: migra **incrementalmente** funcionalidades do legado para o novo sistema, roteando as requisições (façade) até aposentar o legado; reduz risco; planeje como componentes não modificáveis alcançam os novos serviços.
 - **Anti-Corruption Layer**: fachada/adaptador **traduz** entre subsistemas com semânticas diferentes (modelo legado "não contamina" o novo); sem regras de negócio nem orquestração na camada; é mais um serviço a manter.
 
+**Nota de revisão (2026-11, C#):** esta skill não contém snippets C# nem afirmações de linguagem/BCL; é arquitetural (e-book de microsserviços e Azure Architecture Center). Nesta passada de C# as páginas dessas fontes NÃO foram relidas: as afirmações sobre Saga, Idempotent Consumer, Retry, Circuit Breaker, CQRS, gateway etc. permanecem não reconferidas aqui (confirme na doc antes de citar literalmente).
+
 ## Checklist de revisão
 | # | Verificar | Gravidade |
 |---|---|---|

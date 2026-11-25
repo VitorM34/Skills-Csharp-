@@ -35,10 +35,12 @@ Razor Pages simplifica cenários **orientados a página** (mais produtivo que co
 **Page filters** (`IPageFilter`/`IAsyncPageFilter`) rodam **depois da seleção do handler, antes do model binding** (`OnPageHandlerSelected`), **antes do handler após o binding** (`OnPageHandlerExecuting`) e **depois** (`OnPageHandlerExecuted`); aplicáveis **por página ou globalmente**, **não por handler**; aceitam DI (`ServiceFilter`/`TypeFilter`). **Implemente sync OU async, não ambos** (se ambos, só async). Só filtros dão acesso ao **contexto da página** (middleware não). Filtros de MVC "Action" **não** se aplicam a Razor Pages.
 
 ## Autorização
-- **Convenções no startup** (`AddRazorPages(o => o.Conventions...)`): `AuthorizePage("/Contact")`, `AuthorizePage("/Contact", "PolicyName")`, `AuthorizeFolder("/Private")`, `AllowAnonymousToPage/Folder`, `AuthorizeAreaPage/Folder`. O caminho é o **View Engine path** (relativo à raiz de Razor Pages, sem extensão, só `/`). Também vale **`[Authorize]` na classe do PageModel**. Detalhes de políticas/roles/recursos: `aspnet-authentication-authorization`.
+- **Convenções no startup** (`AddRazorPages(o => o.Conventions...)`): `AuthorizePage("/Contact")`, `AuthorizePage("/Contact", "PolicyName")`, `AuthorizeFolder("/Private")`, `AllowAnonymousToPage/Folder`, `AuthorizeAreaPage/Folder`. O caminho é o **View Engine path** (relativo à raiz de Razor Pages, só `/`; "sem extensão" a doc diz para `AuthorizePage`). Se há `AllowAnonymous` e autorização para a mesma página, o `AllowAnonymousFilter` **prevalece**. Também vale **`[Authorize]` na classe do PageModel**. Detalhes de políticas/roles/recursos: `aspnet-authentication-authorization`.
 
 ## Testes
 Teste a lógica do `PageModel` em unidade: mocke dependências (ex.: repositório/serviço), invoque o handler e verifique propriedades do modelo e o `IActionResult` retornado (ver `dotnet-unit-testing`; doc *Razor Pages unit tests*). Para o pipeline completo use `dotnet-integration-testing`.
+
+**Nota de revisão (2026-11):** conferidos em texto: `@page` primeira diretiva, `Pages/`, `<Nome>Model`, handlers e sufixo `Async` opcional, named handlers, fallback de HEAD para `OnGet`, page filters (eventos, por página ou global, nunca por handler, sync **ou** async), convenções de autorização, `RedirectToPage`/`asp-page` relativo e absoluto, layout em `Pages/Shared`, `WithRazorPagesRoot`/`AtContentRoot`, `FormTagHelper` injeta antiforgery, `TempData` com `Keep`/`Peek`, `[BindProperty]` em GET só com opt-in. A página de *conventions* foi lida só nos primeiros ~40 mil caracteres.
 
 ## Checklist de revisão
 | # | Verificar | Gravidade |

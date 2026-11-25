@@ -11,7 +11,7 @@ Regra de ouro: afirme só o que está na documentação oficial (fontes no fim).
 
 1. **Query ≠ resultado.** Uma *query variable* guarda a consulta, não os dados. Nada executa até iterar (`foreach`, `MoveNext`) ou chamar um operador que devolve valor único.
 2. **Execução adiada** para operadores que devolvem sequência (`Where`, `Select`, `OrderBy`...). **Execução imediata** para os que devolvem valor único (`Count`, `Sum`, `Average`, `Max`, `First`...) e para `ToList()`/`ToArray()`.
-3. Iterar a mesma query variable duas vezes **reexecuta** a consulta; o resultado só é o mesmo se fonte e query não mudaram. Para congelar um resultado: `ToList()`/`ToArray()`.
+3. Iterar a mesma query variable duas vezes: a doc diz que produz os **mesmos resultados enquanto nem a query nem a fonte foram modificadas** (a página não usa a palavra "reexecuta"; é a consequência da execução adiada). Para congelar um resultado: `ToList()`/`ToArray()`.
 4. **Query syntax vs method syntax:** equivalentes, sem diferença semântica ou de desempenho. Operadores como `Count` e `Max` só existem como método. Combinar as duas formas é válido.
 5. **`IEnumerable<T>`** → a lógica do operador roda em memória (delegates). **`IQueryable<T>`** → a query vira *expression tree* e o provedor (ex.: EF Core) traduz para SQL.
 6. Em `IQueryable`, árvores de expressão limitam a sintaxe C# permitida, e cada provedor (EF Core) impõe mais restrições: consulte a doc do provedor.

@@ -19,7 +19,7 @@ Só afirmar o que a doc oficial diz (fontes no fim). Desempenho geral: `aspnet-p
 
 ## Princípios
 - Cache serve para dados que **mudam pouco e são caros de gerar**. **O app nunca deve depender do valor em cache**: sempre ter fallback para buscar na origem.
-- **Nunca use entrada externa como chave** (strings do usuário): consome memória imprevisível e permite ataques (negação de serviço por flood de chaves, acesso indevido). Use identificadores confiáveis.
+- **Evite entrada externa nas chaves** (strings do usuário): a doc de memória diz "Don't insert external input into the cache" e a do HybridCache "Avoid using external user input directly in cache keys" (o texto lido não usa "nunca"); consome memória imprevisível e abre espaço a ataques. Use identificadores confiáveis.
 - Apps em web farm sem sticky sessions → cache distribuído para evitar inconsistência.
 
 ## IMemoryCache (`Microsoft.Extensions.Caching.Memory`)
@@ -29,7 +29,7 @@ Só afirmar o que a doc oficial diz (fontes no fim). Desempenho geral: `aspnet-p
 - `MemoryCache.Compact(percent)` remove em ordem de prioridade; itens `NeverRemove` nunca saem. Dependências de expiração (`IChangeToken`/callbacks) para evict.
 
 ## IDistributedCache
-- Interface por bytes (`GetAsync/SetAsync/RemoveAsync/RefreshAsync`); `GetAsync<T>` pode retornar default quando a chave não existe (extensões para `T`).
+- Interface por bytes (`Get/GetAsync` devolve `byte[]`, `Set/SetAsync`, `Remove/RemoveAsync`, `Refresh/RefreshAsync`). Não existe `GetAsync<T>` embutido: para outros tipos é preciso serializar; a doc **define extensões próprias** `SetAsync<T>`/`GetAsync<T>` com `System.Text.Json` (`GetAsync<T>` devolve `default` se a chave não existe) e indica `HybridCache` como alternativa que serializa por você. Nota de revisão (2026-11, C#): corrigido de "extensões para `T`" (sugeria API da biblioteca); fonte: https://learn.microsoft.com/en-us/aspnet/core/performance/caching/distributed
 - **Redis** entrega melhor desempenho e é **recomendado para produção** (Azure Cache for Redis); SQL Server: use um **SQL Server dedicado** para o cache (compartilhar o mesmo banco dos dados do app reduz desempenho); benchmarking recomendado. Connection strings/segredos fora do controle de versão.
 - Manipule sempre via `IDistributedCache` (não `SqlServerCache`). Não precisa de lifetime Singleton/Scoped explícito para implementações embutidas; evitar criar instância "na mão" (testabilidade/Explicit Dependencies). Guarde só dados muito usados (memória é cara).
 

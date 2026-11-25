@@ -20,8 +20,8 @@ Regra da doc de integração: **se um comportamento pode ser testado com unitár
 - MSTest, NUnit e xUnit suportam VSTest e MTP; **TUnit só MTP**.
 - Escolha **uma plataforma por repositório**; **não misture** projetos VSTest e MTP na mesma solution/execução (não suportado).
 - MTP quando (página *test platforms overview*): cenários Native AOT/trimming, projetos de teste que se comportam como executáveis ("executable-first") e defaults estritos/determinísticos com modelo de extensões opt-in. (Itens como `dotnet watch`, "falhar se nenhum teste rodar" e WinUI/UWP não apareceram na leitura: confira a página.) VSTest quando: mistura com adaptadores não-.NET (a doc diz que suporta cenários de adaptadores de várias linguagens) ou integrações existentes de CI/ferramentas (maior histórico de compatibilidade).
-- `dotnet test` tem dois modos: **VSTest** (padrão; único antes do .NET 10 SDK) e **MTP** (a partir do .NET 10 SDK, só para apps MTP). A doc confirma: VSTest é o modo padrão e o modo MTP nativo existe a partir do .NET 10 SDK. A frase "rodar MTP em modo VSTest (`TestingPlatformDotnetTestSupport=true`) é legado e será removido na MTP v2" e a dica de `Directory.Build.props` **não foram reconfirmadas** nesta revisão (a página de overview lida não as traz): confira em *dotnet test* para MTP.
-- Relatórios TRX no MTP exigem a extensão `Microsoft.Testing.Extensions.TrxReport`; sem ela, a doc diz que opções como `--report-trx` são **não reconhecidas**. (O "exit code 5" desta skill não aparece na página de reports lida: não afirme.)
+- `dotnet test` tem dois modos: **VSTest** (padrão; único antes do .NET 10 SDK) e **MTP** (a partir do .NET 10 SDK, só para apps MTP). A doc confirma: VSTest é o modo padrão e o modo MTP nativo existe a partir do .NET 10 SDK. Reconfirmado em 2026-11 em *Testing with dotnet test*: rodar MTP em modo VSTest (`TestingPlatformDotnetTestSupport=true`) é legado e o suporte "será removido na MTP v2" com .NET 10 SDK (segue disponível no .NET 9 SDK e anteriores); recomenda-se definir `TestingPlatformDotnetTestSupport` em `Directory.Build.props`; misturar VSTest e MTP é cenário não suportado. O modo MTP nativo liga-se com `global.json` `{ "test": { "runner": "Microsoft.Testing.Platform" } }` (exige .NET 10 SDK e MTP 1.7+).
+- Relatórios TRX no MTP exigem a extensão `Microsoft.Testing.Extensions.TrxReport`; sem ela, a doc diz que opções como `--report-trx` são **não reconhecidas**. (Exit code 5 = argumentos de linha de comando inválidos/opção não reconhecida: confirmado em *MTP troubleshooting* e em *dotnet test* para MTP, 2026-11.)
 
 ## 3. Estrutura da solution (tutorial xUnit + integração)
 ```
@@ -48,7 +48,7 @@ Usar traits/categorias (ex.: separar `Category=Integration`) permite rodar subco
 ```bash
 dotnet test --collect:"XPlat Code Coverage"
 ```
-- Cobertura alta **não** prova qualidade, e metas muito ambiciosas (ex.: 95%) podem ser contraproducentes: a página de code coverage lida **não** traz essa ressalva (ver `dotnet-unit-testing` para a fonte; tratar como CONVENÇÃO até conferir).
+- Cobertura alta **não** prova qualidade, e metas muito ambiciosas (ex.: 95%) podem ser contraproducentes: a página de code coverage **não** traz essa ressalva, mas a página *Unit testing best practices* (seção "Code coverage and code quality") traz: cobertura alta não indica qualidade e meta de 95% pode ser contraproducente (reconferido em 2026-11). A página de code coverage também confirma que, no VSTest, `--collect:"Code Coverage"` usa o coletor embutido (`.coverage` binário, conversão por `dotnet-coverage`) e `--collect:"XPlat Code Coverage"` o Coverlet (`coverage.cobertura.xml` em `TestResults`), e que no MTP o `--coverage-output-format` aceita `coverage` (padrão), `xml` e `cobertura`.
 
 ## 6. Pipeline (CI)
 `dotnet test` é multiplataforma e serve em CI/CD e scripts. Rode unitários em todo commit/PR; integração conforme custo (filtro ou job separado). Azure DevOps: tarefa `DotNetCoreCLI@2` (`dotnet test`) funciona com VSTest e MTP; a `VSTest@3` só com VSTest. Para providers e bancos em CI, ver `efcore-testing` (Docker/Testcontainers citados pela doc).
@@ -96,6 +96,8 @@ A doc diz que **idealmente a ordem não deve importar** e é boa prática evitá
 | 10 | Nenhum teste "ignorado" sem motivo documentado |
 | 11 | Testes instáveis tratados na causa; `retry` só para falhas transitórias de integração |
 | 12 | Carga/estresse rodados em Release com ferramenta adequada |
+
+Nota de revisão (2026-11, C#): confirmados (páginas dotnet test MTP, MTP troubleshooting, code coverage, best practices, xUnit tutorial): modos VSTest/MTP do `dotnet test`, `--no-build` implica `--no-restore`, exit codes de MTP (5, 8, 9, 14), `--minimum-expected-tests` (SDK 10.0.100), cobertura acima. Não reconferidos agora: filtros `--filter` (selective-unit-tests), extensões MTP (retry/TRX/HTML etc., exceto exit code 14 já citado), Stryker, carga/estresse, tarefas Azure DevOps.
 
 ## Fontes oficiais
 - Testing in .NET (visão geral): https://learn.microsoft.com/en-us/dotnet/core/testing/

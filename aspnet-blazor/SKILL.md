@@ -39,6 +39,8 @@ Cada componente adota um **render mode** (diretiva/atributo `@rendermode`, na de
 ## Outros pontos úteis
 `@page` rotas; `[Parameter]`/cascading; `EventCallback`; bindings `@bind`; layouts; CSS isolation; `DynamicComponent`; chamar Web API (`call-web-api`); JS interop; testes (bUnit, fora da doc); desempenho (`blazor/performance`).
 
+**Nota de revisão (2026-11, C#):** na página de disposal conferido: com `IDisposable` e `IAsyncDisposable` só o async executa; a doc também diz que lambdas anônimas não exigem unsubscribe **quando o publicador de eventos não vive mais que o componente** (o vazamento ocorre se o objeto do evento sobrevive ao componente). Skill sem snippets C#.
+
 ## Checklist de revisão
 | # | Verificar |
 |---|---|

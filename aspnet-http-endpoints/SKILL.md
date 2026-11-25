@@ -34,10 +34,10 @@ Só afirmar o que a doc oficial diz (fontes no fim); caso contrário, buscar ant
 Regras da doc:
 - Minimal API: `GET`, `HEAD`, `OPTIONS`, `DELETE` **não** fazem bind do corpo implicitamente. Para ler corpo nesses verbos use `[FromBody]` explicitamente.
 - Parâmetro opcional: tipo nullable ou valor default (`int? pageNumber`). Se o valor é inválido e o parâmetro é nullable, o handler **não** executa.
-- Falha de bind: `TryParse` falso → 400; JSON inválido → 400; content-type diferente de `application/json` → 415.
+- Falha de bind: `TryParse` falso → 400; JSON inválido → 400; content-type diferente de `application/json` → 415 (tabela de falhas lida só em resumo — confirme na página; o texto lido confirma `BadHttpRequestException` para parâmetro obrigatório ausente/inválido).
 - Controller: mais de um parâmetro vindo do corpo → exceção. `[FromBody]` não é inferido para tipos simples (`string`, `int`): usar o atributo.
-- `[FromRoute]` não é bom quando o valor pode conter `%2f`: use `[FromQuery]`.
-- Tipos especiais ligados automaticamente: `HttpContext`, `HttpRequest`, `HttpResponse`, `CancellationToken` (= `RequestAborted`), `ClaimsPrincipal`, `Stream`, `PipeReader`.
+- `[FromRoute]` não é bom quando o valor pode conter `%2f`: use `[FromQuery]` (**não confirmado** nas páginas de binding/boas práticas; a única menção a `%2f` lida está na página de routing, sobre *geração* de URL com catch-all `{*path}`).
+- Tipos ligados sem atributo (doc): `HttpContext`, `HttpRequest`, `HttpResponse`, `CancellationToken` (token da requisição HTTP), `ClaimsPrincipal`; o corpo pode ser ligado como `Stream` ou `PipeReader` (o mapeamento para `RequestAborted`/`Body` veio só do resumo).
 - Em Minimal API, restrições de rota (`{id:int}`) e catch-all (`{*rest}`) são suportadas; valor não conversível lança `BadHttpRequestException`.
 
 ## DTO e overposting

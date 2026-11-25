@@ -7,6 +7,8 @@ description: Implementar e revisar models/entidades em C# (classes de domínio, 
 
 Só afirmar o que a doc oficial diz (fontes no fim). DTOs: `dotnet-dto-review`. Mapeamento EF: `efcore-migrations-modeling`. Nullability: `csharp-nullable-references`.
 
+Nota de revisão (2026-11, C#): confirmados contra a doc de records (init nas posicionais, `record struct` mutável, `with` raso, propriedade calculada no acesso, herança só entre records, EF não adequado), `required` (C# 11; todas as regras listadas, incl. `new()` e `SetsRequiredMembers`) e EF Core "Entity types with constructors". Não reconferidos: nullable reference types e convenção de chave (`Id`/`ClassNameId`). O snippet `Todo` compila (C# 11+, nullable habilitado).
+
 ## Escolher: class, record, struct
 
 | Tipo | Igualdade | Imutabilidade | Quando (segundo a doc) |

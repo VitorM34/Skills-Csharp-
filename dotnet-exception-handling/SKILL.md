@@ -7,6 +7,8 @@ description: Implementar e revisar tratamento de exceções em C#/.NET - try/cat
 
 Só afirmar o que a doc oficial diz (fontes no fim). Para exceções em respostas HTTP, ver `aspnet-error-handling`.
 
+Nota de revisão (2026-11, C#): conferidos contra best-practices-for-exceptions, creating-and-throwing-exceptions e FDG exception-throwing: `throw;` × `throw e;` (CA2200), `ExceptionDispatchInfo`, ordem de `catch`, `OperationCanceledException`, validação síncrona de argumentos, tipos reservados (CA2201), helpers `Throw*` (todos listados na doc; versão de introdução de cada um não conferida), mensagem com ponto final, 3 construtores, sufixo `Exception`, não lançar em `finally`/`Equals`/`GetHashCode`/`ToString`/ctor estático. O snippet de exceção customizada compila (a doc ainda mostra `[Serializable]`, opcional). Não relido: a ressalva sobre filtro `when` (já marcada CONVENÇÃO) e a página de coding conventions.
+
 ## Tratando exceções
 1. **`try/catch` só quando dá para se recuperar.** Se não dá, **não capture**: deixe quem está acima na pilha tratar. Ordene `catch` do tipo **mais derivado ao menos derivado**. A doc de best practices diz: se o código não consegue se recuperar, não capture. Os coding conventions dizem "só capture exceções que pode tratar de fato; evite capturar exceções gerais". (A ressalva "salvo com filtro de exceção `when`" é CONVENÇÃO, não consta dessas páginas.)
 2. **Libere recursos** com `using` (preferido, inclusive a forma sem chaves `using var x = ...;`) ou `finally` para o que não é `IDisposable`.
@@ -28,7 +30,7 @@ Só afirmar o que a doc oficial diz (fontes no fim). Para exceções em resposta
 6. **Validar argumentos antes** da parte assíncrona em métodos que retornam `Task`.
 
 ## Exceções customizadas
-- "Só crie quando não há tipo predefinido adequado" e "o nome termina em `Exception`" (derivando de `Exception`) são regras das design guidelines/CA1710, que **não li** (a página de criar/lançar lida não trata de nome nem de "quando criar"): tratar como CONVENÇÃO.
+- "Só crie quando não há tipo predefinido adequado" e "o nome termina em `Exception`" (derivando de `Exception`): confirmados na página de best practices ("Introduce a new exception class only when a predefined one doesn't apply"; "End exception class names with Exception"); a página de criar/lançar não trata disso.
 - A doc diz que a classe derivada deve definir **ao menos 3 construtores**: `()`, `(string message)`, `(string message, Exception inner)`.
 - Adicione propriedades quando o dado ajudar a resolver a exceção; nesse caso **sobrescreva `ToString()`** para incluí-las.
 

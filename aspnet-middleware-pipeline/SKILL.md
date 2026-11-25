@@ -21,6 +21,7 @@ app.Use(async (context, next) =>
 Regras: **não chame `next` depois que a resposta começou** e não altere status/headers depois que o corpo começou (lança exceção); escrever no corpo depois de `next` pode violar `Content-Length` ou corromper o formato. Cheque `Response.HasStarted`.
 
 ## Ordem recomendada (doc "Middleware order")
+*(Revisão 2026-11: da página de middleware só os ~40 mil primeiros caracteres vieram em texto — Use/Run/Map, `HasStarted`, exceção → HSTS → HTTPS redirection. O restante da lista (rate limiter após routing, localization, CORS → auth, antiforgery, session, caching) conferiu só com um resumo; reconfirme na página antes de citar.)*
 1. Exceção/erro: **Development** → `UseDeveloperExceptionPage` (e `UseDatabaseErrorPage`); **Production** → `UseExceptionHandler` + `UseHsts`. Handlers de exceção entram **cedo** para capturar exceções dos seguintes.
 2. `UseHttpsRedirection`
 3. `UseStaticFiles` (se necessário; curto-circuita) / `MapStaticAssets`
@@ -51,6 +52,8 @@ public class RequestCultureMiddleware(RequestDelegate next)
 }
 ```
 
+**Nota de revisão (2026-11, C#):** os snippets compilam em C# 14/.NET 10 (`IMyScopedService` é tipo ilustrativo; o construtor primário captura `next` como campo, uma vez por vida da app). Não verificado contra a doc nesta passada: o texto sobre alocações de `InvokeAsync`.
+
 ## Roteamento (doc "Routing")
 - Roteamento por **endpoints**: `UseRouting` seleciona o endpoint e o anexa ao `HttpContext`; o endpoint é `null` antes de `UseRouting`; middleware **depois** de `UseEndpoints` só roda se nada casou. Endpoints são imutáveis e sempre **terminais**.
 - **Metadata de endpoint** (ex.: política de autorização, `[RequiresAudit]`) permite middleware por endpoint no padrão *opt-in*.
@@ -60,7 +63,7 @@ public class RequestCultureMiddleware(RequestDelegate next)
 - Middleware pode curto-circuitar **após** o roteamento (ver "Short-circuit middleware after routing").
 
 ## Ambientes
-- Ambiente vem de `DOTNET_ENVIRONMENT` / `ASPNETCORE_ENVIRONMENT`; **sem definir = `Production`**. O último valor lido prevalece e não muda com o app rodando. Azure App Service adota `Production` por padrão.
+- Ambiente vem de `DOTNET_ENVIRONMENT` / `ASPNETCORE_ENVIRONMENT`; **sem definir = `Production`**. **Precedência (a doc diverge por versão):** na página atual (.NET 10+), `DOTNET_ENVIRONMENT`, se presente, é lido no bootstrap e **tem precedência** sobre `ASPNETCORE_ENVIRONMENT`; o bloco do .NET 6 da mesma página diz o contrário. A doc recomenda, para apps web, definir só `ASPNETCORE_ENVIRONMENT`. Não muda com o app rodando. Azure App Service adota `Production` por padrão.
 - Código por ambiente: `app.Environment.IsDevelopment()` no pipeline; ao configurar serviços use `builder.Environment`.
 - `launchSettings.json` só vale na máquina de desenvolvimento (e só o projeto de inicialização). Carregue configuração por ambiente (`appsettings.{ENV}.json`). Detalhes em `aspnet-configuration-options`.
 

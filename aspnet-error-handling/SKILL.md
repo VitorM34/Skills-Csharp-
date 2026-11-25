@@ -55,6 +55,8 @@ app.Run();
 | 7 | Clientes que pedem XML/HTML tratados no fallback |
 | 8 | Erros logados (logging) com correlação (`traceId` vem no ProblemDetails) |
 
+**Nota de revisão (2026-11):** conferidos em texto: `AddProblemDetails` registra `IProblemDetailsService`, fallback para `Accept` não JSON, `/error` sem atributo de verbo, `IgnoreApi`, `IExceptionHandler` (ordem de registro, singleton, exige `UseExceptionHandler`, `true` sem escrever vira 404, `SuppressDiagnosticsCallback` no .NET 10), filtro com `Order = int.MaxValue - 10`, `ClientErrorMapping`, `CustomizeProblemDetails`, `InvalidModelStateResponseFactory`, Developer Exception Page só em Development. Reconferidos (2026-11, C#): a página cita **RFC 7807** nos exemplos e **RFC 9457** na seção de controllers (ambas aparecem), e `UseStatusCodePages` cobre erros de roteamento como 404; snippets (`Results.Problem().ExecuteAsync(ctx)`, `/error`, `ClientErrorMapping`) conferem com a doc. A assinatura exata de `IExceptionHandler.TryHandleAsync` não foi relida nesta passada (trecho só descrito, não compilável como está).
+
 ## Fontes oficiais
 - Handle errors in ASP.NET Core APIs: https://learn.microsoft.com/en-us/aspnet/core/fundamentals/error-handling-api
 - Handle errors in ASP.NET Core (geral): https://learn.microsoft.com/en-us/aspnet/core/fundamentals/error-handling

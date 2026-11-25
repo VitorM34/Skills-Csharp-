@@ -24,7 +24,7 @@ Fonte: convenções da equipe `dotnet/docs`, adotadas das diretrizes do .NET Run
 | Exceção | sufixo `Exception` (não conferido nas duas páginas desta revisão; vem das Framework Design Guidelines) |
 | Coleção | sufixo `Collection`/`Dictionary`; ver `csharp-collections` (não conferido nas duas páginas desta revisão) |
 - Nomes significativos e descritivos; **clareza > brevidade**; evite abreviações e acrônimos (exceto os amplamente aceitos); evite nome de uma letra (exceto contador de loop); **sem dois `_` consecutivos**.
-- Namespace descritivo em notação de domínio reverso; nome de assembly reflete o propósito.
+- Namespace descritivo com prefixo de empresa/produto (FDG; ver nota ao final sobre "domínio reverso"); nome de assembly reflete o propósito.
 - Records posicionais: parâmetros em PascalCase.
 
 ## Linguagem (guidelines)
@@ -49,7 +49,7 @@ Fonte: convenções da equipe `dotnet/docs`, adotadas das diretrizes do .NET Run
 
 A página também limita linhas a **65 caracteres** — regra pensada para os exemplos publicados na doc; em projeto real siga o limite do `.editorconfig`.
 
-**Não conferido nesta revisão** (não estava nas duas páginas lidas): namespace em domínio reverso/nome de assembly, "capture só exceções que sabe tratar", "interpolação baseada em expressão", "em LINQ a tipagem implícita é preferida" e a origem "diretrizes do .NET Runtime/Roslyn" citada no topo. Trate como convenção até confirmar.
+**Reconferido (2ª passada):** "capture só exceções que sabe tratar" ("Only catch exceptions that can be properly handled; avoid catching general exceptions"), "interpolação baseada em expressão, não posicional" e "em LINQ use tipagem implícita nas variáveis de query e de intervalo (isso sobrepõe a regra geral do `var`)" estão na página de convenções. Sufixos `Exception`, `Attribute`, `Collection`, `Dictionary` vêm das Framework Design Guidelines (reimpressão de 2008, com aviso de possível desatualização). **Namespace:** a FDG pede prefixo de empresa (`<Company>.(<Product>|<Technology>)[.<Feature>]`) e PascalCase; "notação de domínio reverso" **não** aparece nessa página. Nomes de assembly: `<Company>.<Component>.dll` (FDG). **Ainda não conferido:** a origem "diretrizes do .NET Runtime/Roslyn" citada no topo.
 
 ## Ferramentas
 `.editorconfig` + code analysis (naming rules, style rules) para impor; o `.editorconfig` do `dotnet/docs` serve de ponto de partida. Segurança: *Secure coding guidelines*.

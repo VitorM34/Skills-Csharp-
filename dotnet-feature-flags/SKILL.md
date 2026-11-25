@@ -6,6 +6,7 @@ description: Implementar e revisar feature flags em .NET/ASP.NET Core com Micros
 # Feature flags com Microsoft.FeatureManagement
 
 **Proveniência:** (1) documentação **oficial Microsoft** no Learn — *.NET feature management* (`feature-management-dotnet-reference`), *Feature management overview* (`concept-feature-management`), quickstart ASP.NET Core de App Configuration e how-to de telemetria — marcada **[MS]**; (2) **código-fonte** do repositório `microsoft/FeatureManagement-Dotnet` (inclusive `WithFeatureGate` para Minimal APIs, que **não aparece na página de referência que li**) marcado **[SRC]**. **CONVENÇÃO** = recomendação desta skill, não da doc. **Não li:** schema JSON completo (`FeatureManagement.v2.0.0`), recorrência detalhada do TimeWindow (apenas o essencial), o pacote `Microsoft.FeatureManagement.Telemetry.OpenTelemetry` (só o README do repo), How-to de variantes específicas de App Configuration, preços/limites do Azure App Configuration, e produtos de terceiros (LaunchDarkly, Unleash, OpenFeature). **Limite da revisão lado a lado (2026-11):** da página de referência (70 mil caracteres) só os primeiros ~40 mil foram lidos em texto; variantes, telemetria, accessor de targeting padrão (`Identity.Name`/claims `Role`), `TargetingEvaluationOptions.IgnoreCase` e `IFeatureDefinitionProvider` conferem apenas com um resumo. `IFeatureManager` e `WithFeatureGate` **não** aparecem nas páginas lidas. Versões no NuGet (out/2026): `Microsoft.FeatureManagement` e `.AspNetCore` **4.8.0**.
+**Nota de revisão (2026-11, C#):** confirmados na página de referência (ms.date 2026-06-18): `IVariantFeatureManager.IsEnabledAsync`, `GetVariantAsync(nome, CancellationToken)`, `Variant.Configuration` como `IConfigurationSection`, `IVariantFeatureManagerSnapshot`, `AddScopedFeatureManagement`, `IFeatureFilter.EvaluateAsync(FeatureFilterEvaluationContext)`, `context.Parameters.Get<T>() ?? new T()`, `[FilterAlias]`, `AddFeatureFilter<T>()`, `IgnoreMissingFeatureFilters`, `IFeatureDefinitionProvider`, `IContextualFeatureFilter<T>`; os snippets compilam. Não confirmado: `IsEnabledAsync(nome, ct)` (ver comentário no snippet).
 Ligações: `aspnet-configuration-options`, `aspnet-minimal-api`, `aspnet-mvc-controllers-filters`, `aspnet-razor-pages`, `aspnet-blazor`, `dotnet-dependency-injection`, `dotnet-observability`, `aspnet-health-checks`, `dotnet-unit-testing`, `dotnet-integration-testing`, `dotnet-security-review`, `aspnet-web-security`, `dotnet-feature-workflow`.
 
 ## Quando usar / não usar (CONVENÇÃO)
@@ -38,6 +39,7 @@ public class CheckoutService(IVariantFeatureManager features)
 {
     public async Task RunAsync(CancellationToken ct)
     {
+        // a doc mostra IsEnabledAsync("FeatureX") e GetVariantAsync(nome, CancellationToken); a sobrecarga IsEnabledAsync(nome, ct) não aparece na página lida — confirme na versão instalada
         if (await features.IsEnabledAsync(Flags.NewCheckout, ct)) { /* novo */ } else { /* antigo */ }
     }
 }

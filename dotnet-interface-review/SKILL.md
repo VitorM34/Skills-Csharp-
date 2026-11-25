@@ -16,7 +16,7 @@ Regra de ouro: só afirmar o que a doc oficial diz (fontes no fim); fora disso, 
 - **Herança de interface:** quem implementa `IShape : IDrawable` implementa os membros de ambas.
 - **Interface vs classe abstrata:**
   - Classe abstrata → tipos relacionados que compartilham estado (campos), construtores, membros não públicos; permite adicionar membros com comportamento padrão sem quebrar derivados.
-  - Interface → contrato que atravessa hierarquias não relacionadas ou múltiplos contratos; única opção comum para structs (esta última parte não foi reconferida; a doc também diz que a classe abstrata permite acrescentar comportamento padrão — não relido nesta revisão).
+  - Interface → contrato que atravessa hierarquias não relacionadas ou múltiplos contratos; interfaces são a única forma de compartilhar comportamento entre tipos struct (struct não herda de struct/classe); a doc também diz que a classe abstrata permite acrescentar membros com comportamento padrão sem quebrar derivados (reconferido em 2026-11).
   - A página da palavra-chave `interface` nota que membros **com implementação default** são `private` por padrão (membros abstratos são implicitamente `public`) e que campos de instância/auto-propriedades de instância não são permitidos; a página fala de recursos de versões novas do C# — confira a versão do projeto antes de recomendar.
 - Recursos avançados: *default interface members* e *static abstract members*.
 
@@ -53,11 +53,13 @@ public sealed class OrderService(IOrderRepository repository) : IOrderService
 ```
 (Métodos assíncronos retornam `Task`/`Task<T>` e terminam em `Async`: ver `csharp-async-await`.)
 
+**Nota de revisão (2026-11, C#):** confirmados nas páginas de interfaces, `interface` (keyword), explicit implementation e FDG Interface Design: membros sem campos/ctor de instância/finalizer; `public` por padrão (página de interfaces) com a ressalva da página da keyword de que membros com corpo default são `private` por padrão; explícita para membros distintos de mesmo nome e para assinatura com tipos `internal`; sem modificador de acesso em implementação explícita (CS0106); abstract class vs interface; todas as diretrizes FDG listadas. O snippet usa primary constructor (C# 12) e corpos `/* ... */` omitidos: como escrito os métodos `async` não compilam (faltam `return`/`await`), é esqueleto. Observação: a doc de `interface` já documenta recursos de C# 15 (membros estáticos não-virtuais sem suporte de runtime); não aplicável a C# 14/.NET 10.
+
 ## Checklist de revisão
 
 | # | Verificar | Problema |
 |---|---|---|
-| 1 | Todos os membros implementados, assinaturas idênticas (tipo de retorno, parâmetros, nullability) | Não compila / contrato violado |
+| 1 | Todos os membros implementados, assinaturas idênticas (tipo de retorno, parâmetros; nullability divergente tende a gerar só aviso do compilador, não confirmado nas páginas de interface: confirme na doc de nullable) | Não compila / contrato violado |
 | 2 | Nome começa com `I`; sem sufixo de implementação | Convenção |
 | 3 | Interface com muitos membros não coesos | Contrato inchado; dividir |
 | 4 | Interface sem nenhuma implementação ou consumidor | Design não validado (guideline) |

@@ -13,12 +13,12 @@ Só afirmar o que a doc oficial diz (fontes no fim). Records/`required`: `dotnet
 | **class** (referência) | instâncias representam **identidade compartilhada**, não valores iguais; duas referências ao mesmo objeto ficam em sincronia; suporta **herança**. Acesso padrão: `internal` (use `public` para outros assemblies). |
 | **struct** (valor) | tipo **pequeno** (a doc diz "cerca de 16 bytes ou menos") cujo papel é guardar dados, sem modelar comportamento; **semântica de valor** (duas instâncias com os mesmos dados são iguais); **sem herança** (só implementa interfaces). Atribuição **copia** tudo. |
 | **record** | dados imutáveis com igualdade por valor (ver `dotnet-model-review`) |
-| **enum** | valor deve ser um de um conjunto **fixo**; base `int` por padrão (valores 0,1,…); use em `switch` expression (o compilador avisa itens não tratados); `[Flags]` para combinações (e `ToString()` lista `Read, Write`); prefira `TryParse` a `Parse` para entrada possivelmente inválida |
+| **enum** | valor deve ser um de um conjunto **fixo**; base `int` por padrão (valores 0,1,…); use em `switch` expression (o compilador avisa itens não tratados — só quando não há braço descarte `_` que cubra o resto); `[Flags]` para combinações (e `ToString()` lista `Read, Write`); prefira `TryParse` a `Parse` para entrada possivelmente inválida |
 
 ### Structs: detalhes da doc
 - `new T()` roda o construtor sem parâmetros (pode ter lógica); **`default(T)` ignora o construtor** e zera os campos (`0`, `null`, `false`). Campos não atribuídos no construtor são inicializados automaticamente.
 - **`readonly struct`** garante que nenhum membro altera estado (campos e auto-properties read-only); ou marque membros `readonly` individualmente.
-- Plain structs **não ganham `==`** automaticamente; se definir `==`/`!=`, faça par e mantenha consistente com `Equals`/`GetHashCode`. Tuplas são value types; nomes dos elementos **não** entram na comparação, só posição e valor.
+- Plain structs **não ganham `==`** automaticamente; se definir `==`/`!=`, faça par e mantenha consistente com `Equals`/`GetHashCode`. Tuplas são value types; nomes dos elementos **não** entram na comparação, só posição e valor. *(Conferido na página de igualdade: "structs simples não têm `==` predefinido"; nomes de elementos de tupla são conveniência de compilação, valem posição e valor. A página de structs não traz essas frases.)* A página de structs diz "tamanho de cerca de 16 bytes ou menos" e que `default` ignora o construtor.
 
 ### Classes: construtores e inicialização
 - Opções: **field initializers**, parâmetros de construtor (obrigam o chamador a fornecer), **primary constructors** (C# 12), **`required`** (obriga via object initializer), **object initializers** (qualquer propriedade com `set` ou `init`).
@@ -35,7 +35,7 @@ Só afirmar o que a doc oficial diz (fontes no fim). Records/`required`: `dotnet
 ## Igualdade (doc "Equality comparisons")
 - **Igualdade de valor** (dados iguais) × **de referência** (mesmo objeto). Padrão: value types comparam dados; reference types comparam identidade (autor do tipo pode mudar). **Records comparam por valor.**
 - `Object.ReferenceEquals` sempre testa identidade, **independente** de overrides/`==`; use-o dentro de `Equals` para curto-circuito; retorna **`false` para value types** (boxing separado).
-- Ao sobrescrever `Equals`, **sobrescreva `GetHashCode` junto** e mantenha `==`/`!=` consistentes. Prefira `is null`/`is not null` a `== null` (o operador `==` pode ser sobrecarregado).
+- Ao sobrescrever `Equals`, **sobrescreva `GetHashCode` junto** (a página de igualdade declara o contrato — valores iguais têm o mesmo hash — e que `==` definido exige `!=`; a ordem direta "sobrescreva os dois" não está escrita assim) e mantenha `==`/`!=` consistentes. Prefira `is null`/`is not null` a `== null` (o operador `==` pode ser sobrecarregado).
 
 ## Checklist de revisão
 | # | Verificar |

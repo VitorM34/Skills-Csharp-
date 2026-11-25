@@ -105,6 +105,8 @@ Para SPAs a doc recomenda **Playwright for .NET** (automatiza navegador). Teste 
 | 11 | Ambiente de teste definido explicitamente |
 | 12 | Nenhum segredo/connection string de produção em testes |
 
+Nota de revisão (2026-11, C#): reconferidos em aspnetcore-10.0 (só os primeiros ~100 mil de ~268 mil caracteres da página foram lidos): pacote `Microsoft.AspNetCore.Mvc.Testing`, `Microsoft.NET.Sdk.Web`, `xunit.runner.visualstudio` 2.4.2 + `Microsoft.NET.Test.Sdk`, ambiente padrão `Development`, `ConfigureServices` do teste roda depois do `Program.cs`, `args` em `CreateBuilder`, `WebApplicationFactoryContentRootAttribute`/`.sln`, `AllowAutoRedirect = false`, `BaseAddress`, `shadowCopy`, AngleSharp não suportado/necessário, `ConfigureWebApplicationBuilder` só no .NET 11 Preview 7, `TestAuthHandler` com `AuthenticateResult.Success`. A doc usa `IDbContextOptionsConfiguration<TContext>` ao remover o descritor do DbContext (o esqueleto acima é genérico). Continua não confirmado: como expor `Program` (top-level) ao projeto de teste; seções de middleware/`TestServer` e Minimal APIs não relidas.
+
 ## Fontes oficiais
 - Integration tests in ASP.NET Core: https://learn.microsoft.com/en-us/aspnet/core/test/integration-tests
 - Testing in .NET (tipos de teste): https://learn.microsoft.com/en-us/dotnet/core/testing/

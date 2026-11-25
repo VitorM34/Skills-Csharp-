@@ -7,6 +7,8 @@ description: Implementar e revisar services (camada de serviço / application se
 
 Observação honesta: a doc oficial **não define um "padrão de service layer" próprio**. As regras abaixo vêm de: Clean Architecture/camadas, princípios arquiteturais, guidelines de DI, e TAP/async. Onde algo é convenção e não doc, está marcado **[CONVENÇÃO]**.
 
+Nota de revisão (2026-11, C#): confirmados contra common-web-application-architectures (Application Core com entidades/interfaces/domain services; Infrastructure implementa interfaces; repository como forma comum), DI guidelines/service-lifetimes e DbContext lifetime (scoped por padrão, não thread-safe, sem operações paralelas no mesmo contexto). Não confirmado: "`DbContext` já é unit of work/repository" (a doc lida só diz unit-of-work; "repository" é CONVENÇÃO). O snippet depende de tipos não definidos (`IOrderService`, `IOrderRepository`, `OrderDto.From`); com eles compila em C# 12+ (construtor primário; `clock` não usado gera só aviso).
+
 ## Onde mora cada coisa (doc: Clean Architecture)
 - **Domain services** e **interfaces** (inclusive as de repositório) → Application Core.
 - **Implementações que tocam infraestrutura** (EF Core, arquivos, e-mail) → Infrastructure, implementando interfaces do Core.

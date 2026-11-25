@@ -13,8 +13,8 @@ Só afirmar o que a doc oficial diz (fontes no fim). Base de modelagem/migration
 - **Chaves alternativas**: só leitura e podem ser alvo de FK; **para apenas unicidade use índice único**.
 
 ## Propriedades
-- Colunas: nome, tipo, **`HasMaxLength`** (dica ao provedor sobre o tipo; só em `string`/`byte[]`), **precisão e escala** (`HasPrecision(p, s)`/`[Precision]`; escala nunca sem precisão), **Unicode** (texto é Unicode por padrão; configurável para `varchar` onde existir).
-- **Required × optional:** por convenção, tipo que aceita `null` ⇒ opcional (coluna nullable); tipos que não aceitam ⇒ required. Com nullable reference types habilitado, `string` = required, `string?` = optional (ver `csharp-nullable-references`).
+- Colunas: nome, tipo, **`HasMaxLength`** (dica ao provedor sobre o tipo; a doc diz que vale para tipos array, como `string` e `byte[]`; o EF não valida o tamanho antes de enviar), **precisão e escala** (`HasPrecision(p, s)`/`[Precision]`; escala nunca sem precisão), **Unicode** (texto é Unicode por padrão; configurável para `varchar` onde existir).
+- **Required × optional:** por convenção, tipo que aceita `null` ⇒ opcional (coluna nullable); tipos que não aceitam ⇒ required. Com nullable reference types habilitado, `string` = required, `string?` = optional (ver `csharp-nullable-references`). Para não gerar CS8618, a doc de NRT do EF indica `required` (C# 11+) ou constructor binding; em navegação de referência, `= null!`.
 - Propriedades incluídas/excluídas, backing fields, **indexer/shadow properties** (existem só no modelo; **não acessíveis após query no-tracking**).
 
 ## Valores gerados
@@ -29,10 +29,10 @@ Convenção cria índice para **FK**; `HasIndex`/`[Index]`. **Composto** acelera
 |---|---|---|
 | Identidade | tipo de **entidade** com chave oculta (semântica de referência) | **sem identidade**, semântica de **valor** |
 | Mesma instância em 2 propriedades | **não** (ex.: endereço de cobrança = entrega falha) | **sim** |
-| Tipo .NET | só referência | referência **ou valor** (struct/record) |
+| Tipo .NET | só referência | referência (`class`/`record`) **ou valor** (`struct`/`record struct`, EF 10+) |
 | Navegações para outras entidades | pode | **não** |
 | `ExecuteUpdate` | **não suportado** | suportado |
-- A doc **recomenda complex types para value objects** (Address, Coordinate). **Complex types não são descobertos por convenção**: `[ComplexType]` ou `ComplexProperty(...)`; em relacional são mapeados **inline na tabela da entidade** (table splitting). Não rastreados/consultados de forma independente.
+- A doc **recomenda complex types para value objects** (Address, Coordinate). **Complex types não são descobertos por convenção**: `[ComplexType]` ou `ComplexProperty(...)`; em relacional são mapeados **inline na tabela da entidade** (table splitting). Não rastreados/consultados de forma independente. Doc: tipo imutável (`record` com `init`/`required`; mudar = `with`) é o recomendado; struct mutável é desaconselhado em C#; propriedade complex **nullable** (`Address?`) = opcional só no EF 10+ (exige ao menos uma propriedade required); coleção de complex types (EF 10+) em relacional só via `ToJson` e não suporta struct.
 - **Owned** (`OwnsOne`/`[Owned]`, não por convenção salvo Cosmos DB): parte do owner, conceito de *aggregate*; sempre dependente. Coleções owned têm chave composta por convenção.
 
 ## Herança

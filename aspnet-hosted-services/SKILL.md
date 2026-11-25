@@ -29,7 +29,7 @@ builder.Services.AddHostedService<Worker>();
 ```
 - **Ciclo de vida:** ativado **uma vez** na inicialização e encerrado graciosamente no shutdown. `StartAsync` deve ser **curto**: serviços iniciam **sequencialmente na ordem de registro** e nada mais inicia até `StartAsync` concluir (`HostOptions.ServicesStartConcurrently = true` permite concorrência). Na parada, **ordem inversa** (`ServicesStopConcurrently`).
 - **Shutdown:** o token de `StopAsync` tem **timeout padrão de 30 s**; ao ser cancelado, aborte o trabalho restante e retorne rápido; `ExecuteAsync` deve terminar logo quando o token dispara, senão o serviço é encerrado de forma não graciosa ao fim do timeout (configurável, ex.: `HostOptions.ShutdownTimeout`).
-- Se sobrescrever `StartAsync`/`StopAsync` de `BackgroundService`, **chame e dê `await` no método base**.
+- Se sobrescrever `StartAsync`/`StopAsync` de `BackgroundService`, **chame e dê `await` no método base** (regra declarada na página *Worker services*; a de hosted services só mostra o `await base.StopAsync` nos exemplos).
 - Se houver erro na execução, `Dispose` deve ser chamado mesmo sem `StopAsync`.
 - Concluir o host quando o serviço termina: chame `IHostApplicationLifetime.StopApplication()` (obrigatório no template Worker para tarefas "executa uma vez", senão o host roda indefinidamente). Para app curto com DI/logging/config sem a classe `Worker`, use o **Generic Host** puro.
 
@@ -52,11 +52,13 @@ public sealed class Worker(IServiceScopeFactory scopeFactory) : BackgroundServic
 ```
 
 ## Padrões da doc
-- **Timed:** `System.Threading.Timer` **não espera** a execução anterior de `DoWork` terminar (pode sobrepor); incremente contadores com `Interlocked`. Para evitar sobreposição use um loop com `Task.Delay` ou `PeriodicTimer` (a doc traz "Asynchronous timed background task"; confirmar a página antes de detalhar).
+- **Timed:** `System.Threading.Timer` **não espera** a execução anterior de `DoWork` terminar (pode sobrepor); incremente contadores com `Interlocked`. Para evitar sobreposição use um loop com `Task.Delay` ou `PeriodicTimer` (CONVENÇÃO; a doc só mostra `PeriodicTimer` no exemplo assíncrono, sem comparar com `System.Threading.Timer`).
 - **Fila (queued background tasks):** endpoints enfileiram itens e o `BackgroundService` consome (em vez de executar no request).
 - **Native AOT:** há orientação específica na doc.
 - Worker template **não habilita Server GC** por padrão; avalie (`ServerGarbageCollection`).
 - Container: `DockerDefaultTargetOS` (Linux/Windows).
+
+**Nota de revisão (2026-11, C#):** os dois snippets compilam em C# 14/.NET 10 (construtor primário injeta o serviço; `IObjectProcessor` é tipo ilustrativo da doc, não definido aqui; o `using var scope` dentro do `while` descarta o escopo a cada iteração). Não conferido nesta passada contra a página: o comportamento do host quando `ExecuteAsync` lança exceção não tratada.
 
 ## Checklist de revisão
 | # | Verificar | Gravidade |
