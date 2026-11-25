@@ -17,6 +17,7 @@ public class OrdersService(ILogger<OrdersService> logger)
         logger.LogInformation("Getting order {OrderId}", id);
         // ...
         logger.LogWarning("Order {OrderId} not found", id);
+        return null; // placeholder para compilar; sem await real, o compilador emite apenas o warning CS1998
     }
 }
 ```
