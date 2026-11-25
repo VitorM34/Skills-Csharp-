@@ -7,6 +7,7 @@ description: Usar MediatR (mediator in-process, CQRS, pipeline behaviors, notifi
 
 **Proveniência:** documentação **oficial dos projetos** (não é Microsoft): MediatR — README, wiki e fonte do repositório `LuckyPennySoftware/MediatR` (antes `jbogard/MediatR`), marcado **[MR]**; FluentValidation — `docs/` do repositório `FluentValidation/FluentValidation`, marcado **[FV]**. **CONVENÇÃO** = recomendação desta skill, não da doc (inclui a combinação MediatR + FluentValidation, que **não é documentada por nenhum dos dois**). **Não li:** termos completos da licença comercial do MediatR (o PDF/página de licença), alternativas (Mediator source generator, Wolverine, Brighter), `FluentValidation.AspNetCore` em detalhe (descontinuado), pacotes de terceiros de auto-validação/Blazor. Versões vistas no NuGet (out/2026): MediatR 14.2.0, FluentValidation 12.2.0.
 **Limite da revisão lado a lado (2026-11):** as páginas de wiki do MediatR (Behaviors, License-Key-Configuration, Migration Guides) **não carregaram** (devolveram a home do repo); só README e LICENSE.md foram lidos. Ficaram **sem reconfirmação**: `IRequest` sem `IRequest<Unit>` na v12, behaviors não escaneados desde a 12.1 e ordem de registro, behaviors não se aplicam a notificações, `RequestHandlerDelegate` com `CancellationToken`, e o publisher padrão (`ForeachAwaitPublisher`). O README confirma o registro explícito de behaviors/processors, handlers transient, `MediatR.Contracts` e as variáveis de licença com precedência. FluentValidation: páginas oficiais lidas e conferidas (v12, cascade, conditions, DI, async, testes, localização).
+**Nota de revisão (2026-11, C#):** snippets revisados por leitura (primary constructors, `IPipelineBehavior`, `ValidationContext<T>`, `ValidateAsync(ctx, ct)`, `ValidationException(IEnumerable<ValidationFailure>)`) — compilam; corrigido o `Results.Created(..., ...)` do endpoint, que era pseudocódigo. Não conferido contra doc nesta passada: assinaturas atuais do MediatR 14 e o uso concorrente de `ValidationContext`.
 Ligações: `dotnet-clean-architecture`, `dotnet-ddd-tactical`, `dotnet-messaging`, `aspnet-minimal-api`, `aspnet-mvc-controllers-filters`, `aspnet-error-handling`, `dotnet-dependency-injection`, `dotnet-xunit`, `dotnet-security-review`, `dotnet-object-mapping`, `aspnet-validation`.
 
 ## Licenciamento do MediatR — verifique ANTES de adotar [MR]
@@ -49,8 +50,11 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssemblyContaining<Program>();
     // cfg.LicenseKey = builder.Configuration["MediatR:LicenseKey"]; // ou variável de ambiente
 });
-app.MapPost("/orders", async (CreateOrder cmd, ISender sender, CancellationToken ct)
-    => Results.Created(..., await sender.Send(cmd, ct)));
+app.MapPost("/orders", async (CreateOrder cmd, ISender sender, CancellationToken ct) =>
+{
+    var id = await sender.Send(cmd, ct);
+    return Results.Created($"/orders/{id}", id);
+});
 ```
 Sempre repasse o `CancellationToken`.
 ### Registro (v12+)
@@ -128,6 +132,7 @@ public sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidat
         if (validators.Any())
         {
             var ctx = new ValidationContext<TRequest>(request);
+            // CONVENÇÃO/não confirmado: não achei na doc do FluentValidation se um mesmo ValidationContext pode ser compartilhado por validators em paralelo; na dúvida, foreach sequencial com await
             var results = await Task.WhenAll(validators.Select(v => v.ValidateAsync(ctx, ct)));
             var failures = results.SelectMany(r => r.Errors).Where(f => f is not null).ToList();
             if (failures.Count != 0) throw new ValidationException(failures);
