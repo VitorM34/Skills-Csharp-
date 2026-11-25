@@ -33,6 +33,8 @@ Ligações: `dotnet-dto-review` (o que um DTO deve ter), `dotnet-model-review`, 
 - **Teste:** cubra mapeamentos críticos com testes unitários (`dotnet-unit-testing`); com bibliotecas de config, rode validação de configuração (ex.: `AssertConfigurationIsValid` do AutoMapper) em teste/CI.
 - **Desempenho:** mapeamento em memória de N itens é barato frente a I/O; o ganho grande vem de **não buscar colunas/tabelas desnecessárias** (projeção).
 
+**Nota de revisão (2026-11, C#):** confirmado na doc de `record`: `with` faz cópia rasa; `required` (C# 11) faz campo novo obrigatório quebrar quem usa object initializer. NÃO conferidos (confirme na doc/biblioteca): os snippets e limitações de Mapperly/Mapster/AutoMapper (terceiros), o texto das páginas ef-mvc/crud, efficient-querying e eshoponcontainers-cqrs-ddd-microservice, e a licença atual do AutoMapper.
+
 ## Checklist de revisão
 | # | Verificar | Gravidade |
 |---|---|---|
