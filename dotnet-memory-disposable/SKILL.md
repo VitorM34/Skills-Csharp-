@@ -7,6 +7,8 @@ description: Implementar e revisar gerenciamento de recursos e memória em .NET 
 
 Só afirmar o que a doc oficial diz (fontes no fim). DI e descarte de serviços: `dotnet-dependency-injection`. Desempenho web: `aspnet-performance-best-practices`.
 
+Nota de revisão (2026-11, C#): conferidos contra fundamentals do GC, LOH (Windows), workstation/server GC, implementing-dispose, implementing-disposeasync, using-objects e FDG dispose-pattern: Dispose(bool)/idempotência, finalizer só com recurso não gerenciado direto, `SafeHandle`, `Dispose(false)` a partir de `DisposeAsync`, empilhamento de `await using` com `ConfigureAwait`, LOH/gen 2, `GC.Collect`, workstation × server. Não confirmado: "`using var` é a forma preferida" (a doc só apresenta `using` statement e declaration como alternativas; preferência é CONVENÇÃO). Snippet do dispose pattern compila (C# 8+ com `Dispose(disposing: true)`).
+
 ## O que o GC faz (e não faz)
 - O **GC é o gerenciador automático de memória gerenciada**: aloca/libera no heap gerenciado, compacta, dá **memória limpa** a objetos novos e garante **segurança de memória**. **Não** aloca nem libera **memória não gerenciada** e **não chama `Dispose`/`DisposeAsync`**: ele só conhece finalizers.
 - **Gerações 0, 1, 2:** num app bem ajustado a maioria dos objetos morre na geração 0 (ex.: alocações por requisição). Uma coleta de geração N coleta também as mais novas; **Gen 2 = full GC** (mais cara). O usuário só aloca na Gen 0 (objetos pequenos) ou no **LOH** (objetos grandes); promoções para Gen 1/2 são feitas só pelo GC.
@@ -15,7 +17,7 @@ Só afirmar o que a doc oficial diz (fontes no fim). DI e descarte de serviços:
 - **`GC.Collect()`**: quase nunca é necessário (o GC roda continuamente); serve a casos únicos e testes.
 
 ## Quem deve ser descartado
-- **Todo `IDisposable`/`IAsyncDisposable` deve ser descartado**, independentemente do escopo da variável, salvo indicação contrária. Use **`using`** (declaração `using var x = ...;` é a forma preferida de código moderno) ou **`await using`** para `IAsyncDisposable`; `try/finally` direto quando necessário.
+- **Todo `IDisposable`/`IAsyncDisposable` deve ser descartado**, independentemente do escopo da variável, salvo indicação contrária. Use **`using`** (a declaração `using var x = ...;` é a alternativa sem chaves da doc; tratá-la como "preferida" é CONVENÇÃO) ou **`await using`** para `IAsyncDisposable`; `try/finally` direto quando necessário.
 - **Dispose em cascata:** se sua classe **possui** (campo/propriedade) um `IDisposable`, ela também deve implementar `IDisposable` e descartá-lo (quem instancia e guarda como membro é responsável).
 - Objetos **resolvidos do container de DI não são descartados por você**; os que **você** cria (ou registra prontos) são sua responsabilidade (ver DI).
 - `Dispose` deve ser **idempotente**: chamável várias vezes sem exceção, sem efeito a partir da 2ª.
