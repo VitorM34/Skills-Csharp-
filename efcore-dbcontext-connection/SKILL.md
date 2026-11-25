@@ -7,6 +7,8 @@ description: Configurar e revisar a conexão com banco de dados e o DbContext no
 
 Só afirmar o que a doc oficial diz (fontes no fim).
 
+Nota de revisão (2026-11, C#): snippet de `AddDbContext` (`?? throw`, tipo declarado após top-level statements) e padrões `sealed`/`protected DbContextOptions`/`using var context = factory.CreateDbContext()` conferem com a doc de DbContext; corrigida a assinatura de `UseMySql` na tabela.
+
 ## Onde guardar a connection string (doc "Connection Strings")
 A connection string pode conter informação sensível e muda entre ambientes. O ASP.NET Core Configuration permite guardá-la em: `appsettings.json`/`appsettings.Development.json`, **variável de ambiente**, **Azure Key Vault** ou **Secret Manager** (`dotnet user-secrets`). **Segredos nunca devem ir para arquivos de configuração versionados.**
 ```json
@@ -44,7 +46,7 @@ public class ApplicationDbContext : DbContext
 | SQL Server / Azure SQL | `UseSqlServer(cs)` | Microsoft.EntityFrameworkCore.SqlServer |
 | SQLite | `UseSqlite(cs)` | Microsoft.EntityFrameworkCore.Sqlite |
 | PostgreSQL* | `UseNpgsql(cs)` | Npgsql.EntityFrameworkCore.PostgreSQL |
-| MySQL/MariaDB* | `UseMySql(cs)` | Pomelo.EntityFrameworkCore.MySql |
+| MySQL/MariaDB* | `UseMySql(cs, serverVersion)` (a doc de DbContext usa 2 argumentos) | Microting.EntityFrameworkCore.MySql (pacote listado pela doc; Pomelo é outro provider e sua assinatura não foi conferida: confirme na doc dele) |
 | Cosmos DB | `UseCosmos(cs, db)` | Microsoft.EntityFrameworkCore.Cosmos |
 | In-memory | `UseInMemoryDatabase(name)` | Microsoft.EntityFrameworkCore.InMemory |
 \* provedores não mantidos pela Microsoft. **In-memory não é para produção** e a doc de testes do EF Core **desencoraja** seu uso até para testes (ver `efcore-testing`).
