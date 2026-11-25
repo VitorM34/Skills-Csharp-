@@ -8,6 +8,7 @@ description: Escolher e revisar coleções em C# (List<T>, Dictionary, HashSet, 
 Fontes: "Selecting a Collection Class" e "Guidelines for Collections" (Framework Design Guidelines, texto de 2008: a própria doc avisa que parte pode estar desatualizada; trate como diretriz, não lei). Dúvida fora daqui → buscar na doc.
 
 ## Escolher a coleção (perguntas da doc)
+*(Revisão 2026-11: a página "Selecting a collection class" é uma lista de perguntas, não tabela; confirmados Queue/Stack, índice, chave, `KeyedCollection`, `SortedDictionary` mais rápido × `SortedList` menos memória, `LinkedList` nos dois sentidos, imutáveis, concorrentes e "evite `System.Collections`". As guidelines de coleções e a de nomes são reimpressão de 2008 com aviso de desatualização; as regras abaixo conferem com o texto, inclusive "não use `List<T>`/`Dictionary` em APIs públicas" e "propriedades devolvem coleções vivas".)*
 
 | Necessidade | Opção |
 |---|---|
@@ -17,7 +18,7 @@ Fontes: "Selecting a Collection Class" e "Guidelines for Collections" (Framework
 | Acesso por **chave** | `Dictionary<TKey,TValue>` (ordenado: `SortedDictionary`, `SortedList`) |
 | Um valor com chave embutida no item | `KeyedCollection<TKey,TItem>` |
 | Ordenar diferente da inserção | `SortedDictionary` (mais rápido) ou `SortedList` (menos memória); `List<T>.Sort` com `IComparer<T>` |
-| Busca/recuperação rápida | `Dictionary` é mais rápido que `SortedDictionary` na busca |
+| Busca/recuperação rápida | `Dictionary` é mais rápido que `SortedDictionary` na busca (a página lida de coleções thread-safe só diz que, para **só leitura**, `Dictionary` é mais rápido que `ConcurrentDictionary`; a comparação com `SortedDictionary` não foi reconferida) |
 | Multi-thread | `ConcurrentDictionary`, `ConcurrentQueue`, `ConcurrentStack`, `ConcurrentBag` |
 | Imutável | `Immutable*` / `IImmutableList<T>` etc. |
 | Percorrer ambos os sentidos | `LinkedList<T>` |
