@@ -127,6 +127,8 @@ public sealed class ReportJob(IReportService svc, ILogger<ReportJob> log) : IJob
 - [ ] Health check do scheduler; logs/alertas para falha de job; teste com `TimeProvider`/relógio falso.
 - [ ] Licença do Hangfire (e extensões Pro) verificada antes de uso comercial.
 
+**Nota de revisão (2026-11, C#):** a assinatura `ValueTask Execute(IJobExecutionContext, CancellationToken)` e `builder.AddQuartz()`/`AddQuartzHostedService(o => o.WaitForJobsToComplete = true)` conferem com o quick-start do Quartz 4.x; os snippets compilam (`ReportJob` com primary constructor; `log` não é usado, só gera aviso de parâmetro não usado). Hangfire e demais afirmações de terceiros não foram refeitas.
+
 ## Fontes
 - [HF] https://docs.hangfire.io/ (repo `HangfireIO/Hangfire.Documentation`): best-practices, dealing-with-exceptions, performing-recurrent-tasks, using-cancellation-tokens, configuring-queues, running-multiple-server-instances, using-sql-server, using-dashboard, making-aspnet-app-always-running, getting-started/aspnet-core-applications.
 - [QZ] https://www.quartz-scheduler.net/documentation/quartz-4.x/ — best-practices (na revisão, `quartz-4.x/best-practices.html` deu 404; a página compartilhada `https://www.quartz-scheduler.net/documentation/best-practices.html` foi usada), packages/hosted-services-integration, packages/microsoft-di-integration, configuration/reference, tutorial/job-stores (repo `quartznet/quartznet`).
