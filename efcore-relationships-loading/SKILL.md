@@ -7,6 +7,8 @@ description: Modelar e revisar relacionamentos e carregamento de dados relaciona
 
 Só afirmar o que a doc oficial diz (fontes no fim). Consultas eficientes em geral: `efcore-querying`. Modelagem base: `efcore-migrations-modeling`. Mapeamento avançado: `efcore-advanced-mapping`.
 
+Nota de revisão (2026-11, C#): o snippet (`= null!` na navegação required; coleção não-nula inicializada) segue a doc de nullable reference types do EF (coleções devem ser não-nuláveis); `IgnoreQueryFilters(["nome"])` e `HasQueryFilter("nome", ...)` conferem com a doc de filtros (EF 10).
+
 ## Conceitos
 - Relacionamento (modelo relacional): **chave primária** no principal, **chave estrangeira** no dependente, restringida a valores existentes. No EF: **principal (pai)** e **dependente (filho)**; navegações opcionais: *collection navigation* (no principal) e *reference navigation* (no dependente). Relação com as duas navegações = **bidirecional**.
 - **Required × optional:** FK **não nullable** ⇒ relação **required** (todo dependente tem principal). *Required não garante que o principal tenha dependentes*: não há como impor isso no modelo EF nem no relacional. Propriedades de chave não precisam ser públicas, mas **existem** no modelo.
@@ -35,7 +37,7 @@ public class Post { public int Id { get; set; } public int BlogId { get; set; } 
 |---|---|---|
 | **Eager** | `Include`, `ThenInclude`, múltiplos níveis, **filtered include** (`Where/OrderBy/Take` dentro do `Include` da coleção) | um roundtrip; operações aceitas no include filtrado: `Where`, `OrderBy[Descending]`, `ThenBy[Descending]`, `Skip`, `Take`; cada navegação incluída aceita **um único conjunto** de filtros (com vários `Include` da mesma coleção, só um deles pode ter filtro, ou todos repetem operações idênticas); com queries *tracking*, **fixup de navegação** pode trazer entidades já rastreadas que não atendem ao filtro (use `NoTracking` ou recrie o contexto); `Include` em tipos derivados; `AutoInclude` no modelo e `IgnoreAutoIncludes()` na query |
 | **Explicit** | `context.Entry(x).Collection(...).Load()` / `.Query()` | roundtrip extra; útil se a necessidade depende de outro dado |
-| **Lazy** | proxies (`UseLazyLoadingProxies`: navegações `virtual` em classe herdável) ou `ILazyLoader` (parâmetro do construtor chamado `lazyLoader`) | ⚠ **N+1**: evitar (ver `efcore-querying`) |
+| **Lazy** | proxies (`UseLazyLoadingProxies`: navegações `virtual` em classe herdável) ou `ILazyLoader` (injetado por construtor, pacote Microsoft.EntityFrameworkCore.Abstractions) ou o delegate `Action<object, string>` (nesta variante o parâmetro do construtor **precisa** se chamar `lazyLoader`, segundo a doc) | ⚠ **N+1**: evitar (ver `efcore-querying`) |
 - O EF **corrige (fixup) automaticamente navegações** para entidades já carregadas no contexto.
 - **Single vs split queries:** um `Include` de coleção gera **JOIN** → **cartesian explosion** (várias coleções multiplicam linhas) e duplicação de dados (relevante com colunas grandes no principal). **Split query** (`AsSplitQuery()`, ou global) gera uma query por coleção incluída. Padrão do EF: **single** (gera warning quando detecta o risco). Navegações **one-to-one** sempre vêm por JOIN. Com `Skip/Take` e split query em versões **anteriores ao EF 10**, garanta **ordenação totalmente única** (data + ID) para não retornar dados incorretos.
 - Projetar só o necessário (`Select`) evita colunas grandes, mas o resultado (tipo anônimo) **não é rastreado**.
