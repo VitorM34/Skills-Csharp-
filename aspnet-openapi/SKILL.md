@@ -18,7 +18,7 @@ if (app.Environment.IsDevelopment()) app.MapOpenApi();   // /openapi/v1.json
 - JSON por padrão; **YAML** mapeando o endpoint com sufixo `.yaml`/`.yml`.
 - Nome do documento (padrão `v1`), rota (`/openapi/{documentName}.json`; **não** remova `documentName` da rota), **múltiplos documentos** (`AddOpenApi("v2")`; `OpenApiOptions.ShouldInclude` decide os endpoints; `WithGroupName`/`[EndpointGroupName]`).
 - **O endpoint não tem autorização por padrão**: restrinja (`MapOpenApi().RequireAuthorization(...)`). O documento é **regenerado a cada requisição** (permite transformers dinâmicos); cacheie quando aplicável.
-- **Geração em build:** pacote `Microsoft.Extensions.ApiDescription.Server` salva o documento (por padrão em `obj`) no `dotnet build`.
+- **Geração em build:** pacote `Microsoft.Extensions.ApiDescription.Server` + `OpenApiGenerateDocumentsOnBuild` = true salva o documento no `dotnet build`; **a doc diverge sobre o local** (a visão geral diz `obj`, a página de geração diz o diretório de saída, com exemplo em `obj\{Projeto}.json`; `OpenApiDocumentsDirectory` muda). YAML em build-time **não é suportado** (planejado).
 - **UIs (Swagger UI, ReDoc, Scalar) não vêm por padrão** e, como boa prática de **limitar divulgação de informação, devem ficar habilitadas só em Development**. Linter: Spectral.
 
 ## Metadata (controllers com `[ApiController]` e Minimal APIs)
