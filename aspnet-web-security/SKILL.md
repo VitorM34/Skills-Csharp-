@@ -32,14 +32,18 @@ Só afirmar o que a doc oficial diz (fontes no fim). Autenticação/autorizaçã
 
 ## XSS
 - **Nunca coloque dados não confiáveis no HTML** sem codificar. Não confiável = qualquer dado controlável por atacante: formulários, query string, headers, **dados vindos do banco**.
-- Codifique conforme o contexto: HTML element → **HTML encode**; atributo → **attribute encode**; JavaScript → **JavaScript encode** (`<` vira `<`); query string de URL → **URL encode**. **Nunca** use entrada não confiável no **caminho** da URL: passe como valor de query string.
-- **Razor codifica automaticamente** toda saída de variáveis com `@`. **`HtmlString`/`Html.Raw` não codificam: nunca com entrada não confiável.** Não concatene entrada em JavaScript para criar DOM nem use `document.write()` com conteúdo dinâmico.
+- Codifique conforme o contexto: HTML element → **HTML encode**; atributo → **attribute encode**; JavaScript → **JavaScript encode** (`<` vira `\u003C`); query string de URL → **URL encode**. **Nunca** use entrada não confiável no **caminho** da URL: passe como valor de query string.
+- **Razor codifica automaticamente** toda saída de variáveis com `@`. **`HtmlString` não codifica** (página de XSS); `Html.Raw` não aparece na página de XSS lida (só na de antiforgery), mas tem o mesmo efeito: nunca com entrada não confiável. Não concatene entrada em JavaScript para criar DOM nem use `document.write()` com conteúdo dinâmico.
 - Em código: injete `HtmlEncoder`, `JavaScriptEncoder`, `UrlEncoder`; os encoders padrão usam a lista segura (Basic Latin) e ignoram customizações de ranges.
 - **APIs** que devolvem HTML/XML/JSON podem disparar XSS nos clientes se não sanitizarem: faça **validação de entrada e codificação de saída**.
 
 ## Outros pontos da doc de segurança
 - Redirecionamentos abertos: ver *Prevent open redirect attacks*. Cookies SameSite, GDPR/consentimento, IP safelist, anti-CSRF e Data Protection têm páginas próprias; consulte antes de detalhar.
-- **Segredos:** nunca em arquivos de configuração em texto puro; Secret Manager em dev; fora do projeto; sem segredos de produção em dev/test; variáveis de ambiente são texto não criptografado (risco se a máquina for comprometida; a doc recomenda alternativas como Key Vault/identidades gerenciadas).
+- **Segredos:** nunca em arquivos de configuração em texto puro; Secret Manager em dev; fora do projeto; sem segredos de produção em dev/test; variáveis de ambiente são texto não criptografado (risco se a máquina for comprometida); segredos de produção devem ser acessados por meio controlado, como Azure Key Vault; o Secret Manager **não** criptografa e não é repositório confiável. (Identidades gerenciadas **não** aparecem na página de app-secrets lida; ela só remete a "Secure authentication flows".)
+
+**Nota de revisão (2026-11):** conferidos em texto: ordem e recomendações do CORS, origem sem barra final, curinga de subdomínio, `WithHeaders` exato, risco de credenciais, `ERR_INVALID_REDIRECT` no preflight, 307 por padrão no redirect, HSTS fora de Development e ausente nos templates de API, `HTTPS_PORT` × `HTTPS_PORTS`, uma só porta HTTPS, aviso *Failed to determine the https port*, `Data Protection` em farm, encoders (`HtmlEncoder` etc., lista Basic Latin), "não usar entrada não confiável no caminho da URL", dados do banco como não confiáveis. **Só em resumo** (últimas ~16–35 mil caracteres das páginas de antiforgery e de HTTPS não lidas): `AddControllers` × `AddControllersWithViews`, `UseAntiforgery` após auth, `AutoValidateAntiforgeryToken` "amplamente", `IgnoreAntiforgeryToken`, `X-Frame-Options`, múltiplas abas. A proteção CSRF automática por `Sec-Fetch-Site`/`Origin` é do .NET 11, como a skill já diz.
+
+**Nota de revisão (2026-11, C#):** corrigido o exemplo de JavaScript encoding (`<` → `\u003C`, conforme a página de XSS).
 
 ## Checklist de revisão
 | # | Verificar | Gravidade |
